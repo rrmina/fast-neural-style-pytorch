@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms
 
-# Grammian
+# Gram Matrix
 def gram(tensor):
     B, C, H, W = tensor.shape
     x = tensor.view(B, C, H*W)
-    x_t = x.transpose(1, 2)     # (B, H*W, C)
-    return  torch.bmm(x, x_t) # Broadcast Matrix Multiplication (B, C, C)
+    x_t = x.transpose(1, 2)
+    return  torch.bmm(x, x_t) / (C*H*W)
 
 # Load image file
 def load_image(path):
@@ -32,16 +32,17 @@ def show(img):
 # Preprocessing ~ Image to Tensor
 def itot(img, max_size=None):
     # Rescale the image
-    H, W, C = img.shape
     if (max_size==None):
         itot_t = transforms.Compose([
             transforms.ToPILImage(),
             transforms.ToTensor()
         ])    
     else:
+        H, W, C = img.shape
+        image_size = tuple([int((float(max_size) / max([H,W]))*x) for x in [H, W]])
         itot_t = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize(max_size),
+            transforms.Resize(image_size),
             transforms.ToTensor()
         ])
     

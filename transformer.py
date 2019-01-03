@@ -35,7 +35,7 @@ class TransformerNetwork(nn.Module):
         x = self.ConvBlock(x)
         x = self.ResidualBlock(x)
         out = self.DeconvBlock(x)
-        return (out+1)/2
+        return out*150 + 255./2
 
 class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
