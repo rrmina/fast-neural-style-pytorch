@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
+import random
+import numpy as np
+import time
 
 import vgg
 import transformer
@@ -17,9 +20,18 @@ CONTENT_WEIGHT = 1e0
 STYLE_WEIGHT = 5e0
 TV_WEIGHT = 1e-6 
 ADAM_LR = 0.001
-SAVE_PATH = "transformer_weight.pth"
+SAVE_MODEL_PATH = "models/"
+SAVE_IMAGE_PATH = "images/out/"
+SAVE_MODEL_EVERY = 2500 # 10,000 Images with batch size 4
+SEED = 35
 
 def train():
+    # Seeds
+    torch.manual_seed(SEED)
+    torch.cuda.manual_seed(SEED)
+    np.random.seed(SEED)
+    random.seed(SEED)
+
     # Device
     device = ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -50,9 +62,16 @@ def train():
     # Optimizer settings
     optimizer = optim.Adam(TransformerNetwork.parameters(), lr=ADAM_LR)
 
+    # Loss trackers
+    content_loss_history = []
+    style_loss_history = []
+    total_loss_history = []
+
+    # Optimization/Training Loop
+    batch_count = 1
+    start_time = time.time()
     for epoch in range (1, NUM_EPOCHS+1):
-        print("Epoch {}/{}".format(epoch, NUM_EPOCHS+1))
-        count = 0
+        print("========Epoch {}/{}========".format(epoch, NUM_EPOCHS+1))
         for batch_id, (content_batch, _) in enumerate(train_loader):
             # Zero-out Gradients
             optimizer.zero_grad()
@@ -66,14 +85,14 @@ def train():
             # Content Loss
             MSELoss = nn.MSELoss().to(device)
             content_loss = CONTENT_WEIGHT * MSELoss(content_features['relu4_3'], generated_features['relu4_3'])            
-
+            
             # Style Loss
             style_loss = 0
             for key, value in generated_features.items():
                 s_loss = MSELoss(utils.gram(value), style_gram[key])
                 style_loss += s_loss
             style_loss *= STYLE_WEIGHT
-
+            
             # Total Loss
             total_loss = content_loss + style_loss
 
@@ -81,9 +100,54 @@ def train():
             total_loss.backward()
             optimizer.step()
 
+            # Save Model and Print Losses
+            if (((batch_count-1)%SAVE_MODEL_EVERY == 0) or (batch_count==NUM_EPOCHS*len(train_loader))):
+                # Print Losses
+                print("========Iteration {}/{}========".format(batch_count, NUM_EPOCHS*len(train_loader)))
+                print("    Content Loss: {}".format(content_loss.item()))
+                print("    Style Loss: {}".format(style_loss.item()))
+                print("    Total Loss: {}".format(total_loss.item()))
+                print("Time elapsed: {} seconds".format(time.time()-start_time))
+
+                # Save Model
+                checkpoint_path = SAVE_MODEL_PATH + "checkpoint_" + str(batch_count) + ".pth"
+                print("Saving TransformerNetwork checkpoint file at {}".format(checkpoint_path))
+                torch.save(TransformerNetwork.state_dict(), checkpoint_path)
+                print("Done saving checkpoint file")
+
+                # Save sample generated image
+                sample_tensor = generated_batch[0].clone().detach().unsqueeze(dim=0)
+                sample_image = utils.ttoi(sample_tensor)
+                sample_image_path = SAVE_IMAGE_PATH + "sample_" + str(batch_count) + ".png"
+                print("Saving sample tranformed image at {}".format(sample_image_path))
+                utils.saveimg(sample_image, sample_image_path)
+                print("Done saving sample image")
+
+                # Save loss histories
+                content_loss_history.append(content_loss.item())
+                style_loss_history.append(style_loss.item())
+                total_loss_history.append(total_loss.item())
+
+            # Iterated Batch Counter
+            batch_count+=1
+
+    stop_time = time.time()
+    # Print loss histories
+    print("Done Training the Transformer Network!")
+    print("Training Time: {} seconds".format(stop_time-start_time))
+    print("========Content Loss========")
+    print(content_loss_history) 
+    print("========Style Loss========")
+    print(style_loss_history) 
+    print("========Total Loss========")
+    print(total_loss_history) 
+
     # Save TransformerNetwork weights
     TransformerNetwork.eval()
     TransformerNetwork.cpu()
-    torch.save(TransformerNetwork.state_dict(), SAVE_PATH)
+    final_path = SAVE_MODEL_PATH + "transformer_weight.pth"
+    print("Saving TransformerNetwork weights at {}".format(final_path))
+    torch.save(TransformerNetwork.state_dict(), final_path)
+    print("Done saving final model")
 
 train()

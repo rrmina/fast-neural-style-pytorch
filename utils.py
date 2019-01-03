@@ -29,6 +29,10 @@ def show(img):
     plt.imshow(img)
     plt.show()
 
+def saveimg(img, image_path):
+    img = img.clip(0, 255)
+    cv2.imwrite(image_path, img)
+
 # Preprocessing ~ Image to Tensor
 def itot(img, max_size=None):
     # Rescale the image
