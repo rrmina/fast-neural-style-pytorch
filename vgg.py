@@ -9,46 +9,42 @@ class VGG19(nn.Module):
         # Load VGG Skeleton, Pretrained Weights
         vgg19_features = models.vgg19(pretrained=False)
         vgg19_features.load_state_dict(torch.load(vgg_path), strict=False)
-        vgg19_features = vgg19_features.features
+        self.features = vgg19_features.features
 
         # Turn-off Gradient History
-        for param in vgg19_features.parameters():
+        for param in self.features.parameters():
             param.requires_grad = False
 
-        # Reorganize layers ~ easier forward pass
-        self.relu1_2 = torch.nn.Sequential(*list(vgg19_features.children())[0:4])
-        self.relu2_2 = torch.nn.Sequential(*list(vgg19_features.children())[4:9])
-        self.relu3_3 = torch.nn.Sequential(*list(vgg19_features.children())[9:18])
-        self.relu4_2 = torch.nn.Sequential(*list(vgg19_features.children())[18:23])
-        self.relu4_3 = torch.nn.Sequential(*list(vgg19_features.children())[23:27])
-        self.relu5_3 = torch.nn.Sequential(*list(vgg19_features.children())[27:36])
+    def forward(self, x):
+        layers = {'3': 'relu1_2', '8': 'relu2_2', '17': 'relu3_4', '22': 'relu4_2', '26': 'relu4_4', '35': 'relu5_4'}
+        features = {}
+        for name, layer in self.features._modules.items():
+            x = layer(x)
+            if name in layers:
+                features[layers[name]] = x
+
+        return features
+
+class VGG16(nn.Module):
+    def __init__(self, vgg_path="models/vgg16-00b39a1b.pth"):
+        super(VGG16, self).__init__()
+        # Load VGG Skeleton, Pretrained Weights
+        vgg16_features = models.vgg16(pretrained=False)
+        vgg16_features.load_state_dict(torch.load(vgg_path), strict=False)
+        self.features = vgg16_features.features
+
+        # Turn-off Gradient History
+        for param in self.features.parameters():
+            param.requires_grad = False
 
     def forward(self, x):
-        out_1_2 = self.relu1_2(x)
-        h1, w1 = out_1_2.shape[3:4]
+        layers = {'3': 'relu1_2', '8': 'relu2_2', '15': 'relu3_3', '22': 'relu4_3'}
+        features = {}
+        for name, layer in self.features._modules.items():
+            x = layer(x)
+            if name in layers:
+                features[layers[name]] = x
+                if (name=='22'):
+                    break
 
-        out_2_2 = self.relu2_2(out_1_2)
-        h2, w2 = out_2_2.shape[3:4]
-
-        out_3_3 = self.relu3_3(out_2_2)
-        h3, w3 = out_3_3.shape[3:4]
-
-        out_4_2 = self.relu4_2(out_3_3)
-
-        out_4_3 = self.relu4_3(out_4_2)
-        h4, w4 = out_4_3.shape[3:4]
-
-        out_5_3 = self.relu5_3(out_4_3)
-        h5, w5 = out_5_3.shape[3:4]
-
-        return [
-            gram(out_1_2)/(h1*w1), # Style
-            gram(out_2_2)/(h2*w2), 
-            gram(out_3_3)/(h3*w3), 
-            gram(out_4_3)/(h4*w4), 
-            gram(out_5_3)/(h5*w5), 
-            out_4_2                 # Content
-            ]
-
-def gram(x):
-    return utils.gram(x)
+        return features
