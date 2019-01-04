@@ -14,10 +14,10 @@ import utils
 TRAIN_IMAGE_SIZE = 256
 DATASET_PATH = "dataset"
 NUM_EPOCHS = 1
-STYLE_IMAGE_PATH = "images/mosaic.jpg"
+STYLE_IMAGE_PATH = "images/tokyo2.jpg"
 BATCH_SIZE = 4 
-CONTENT_WEIGHT = 2e-6
-STYLE_WEIGHT = 5e0
+CONTENT_WEIGHT = 1e-7 #2e-6
+STYLE_WEIGHT = 65 #50
 TV_WEIGHT = 1e-6 
 ADAM_LR = 0.001
 SAVE_MODEL_PATH = "models/"
@@ -82,7 +82,7 @@ def train():
             optimizer.zero_grad()
 
             # Generate images and get features
-            content_batch = content_batch.to(device)
+            content_batch = content_batch[:,[2,1,0]].to(device)
             generated_batch = TransformerNetwork(content_batch)
             content_features = VGG(content_batch.add(imagenet_neg_mean))
             generated_features = VGG(generated_batch.add(imagenet_neg_mean))
@@ -112,7 +112,7 @@ def train():
             if (((batch_count-1)%SAVE_MODEL_EVERY == 0) or (batch_count==NUM_EPOCHS*len(train_loader))):
                 # Print Losses
                 print("========Iteration {}/{}========".format(batch_count, NUM_EPOCHS*len(train_loader)))
-                print("\tContent Loss:\t{:.2f}".format(batch_total_loss_sum/batch_count))
+                print("\tContent Loss:\t{:.2f}".format(batch_content_loss_sum/batch_count))
                 print("\tStyle Loss:\t{:.2f}".format(batch_style_loss_sum/batch_count))
                 print("\tTotal Loss:\t{:.2f}".format(batch_total_loss_sum/batch_count))
                 print("Time elapsed:\t{} seconds".format(time.time()-start_time))
@@ -125,14 +125,8 @@ def train():
                 # Save sample generated image
                 sample_tensor = generated_batch[0].clone().detach().unsqueeze(dim=0)
                 sample_image = utils.ttoi(sample_tensor.clone().detach())
-                sample_image1 = utils.ttoi(sample_tensor.clone().detach().add(imagenet_neg_mean))
-                sample_image2 = utils.ttoi(sample_tensor.clone().detach().add(imagenet_mean))
                 sample_image_path = SAVE_IMAGE_PATH + "sample0_" + str(batch_count-1) + ".png"
-                #sample_image_path1 = SAVE_IMAGE_PATH + "sample1_" + str(batch_count-1) + ".png"
-                #sample_image_path2 = SAVE_IMAGE_PATH + "sample2_" + str(batch_count-1) + ".png"
                 utils.saveimg(sample_image, sample_image_path)
-                #utils.saveimg(sample_image1, sample_image_path1)
-                #utils.saveimg(sample_image2, sample_image_path2)
                 print("Saved sample tranformed image at {}".format(sample_image_path))
 
                 # Save loss histories

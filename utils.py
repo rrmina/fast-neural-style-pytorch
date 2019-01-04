@@ -38,7 +38,7 @@ def itot(img, max_size=None):
     # Rescale the image
     if (max_size==None):
         itot_t = transforms.Compose([
-            transforms.ToPILImage(),
+            #transforms.ToPILImage(),
             transforms.ToTensor(),
             transforms.Lambda(lambda x: x.mul(255))
         ])    

@@ -30,14 +30,14 @@ class TransformerNetwork(nn.Module):
             DeconvLayer(64, 32, 3, 2, 1),
             nn.ReLU(),
             ConvLayer(32, 3, 9, 1, norm="None"),
-            nn.Tanh()
+            #nn.Tanh()
         )
 
     def forward(self, x):
         x = self.ConvBlock(x)
         x = self.ResidualBlock(x)
         out = self.DeconvBlock(x)
-        return out*150
+        return out#*150
 
 class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):

@@ -2,8 +2,8 @@ import torch
 import utils
 import transformer
 
-STYLE_TRANSFORM_PATH = "transforms/mosaic_dark.pth"
-CONTENT_IMAGE_PATH = "images/rusty.jpg"
+STYLE_TRANSFORM_PATH = "transforms/tokyo_ghoul3.pth"
+CONTENT_IMAGE_PATH = "images/sungha-jung.jpg"
 
 def stylize():
     # Device
@@ -25,5 +25,6 @@ def stylize():
     print("4")
 
     utils.show(generated_image)
+    utils.saveimg(generated_image, "rusty_tg.png")
 
 stylize()
