@@ -1,0 +1,18 @@
+mosaic_aggressive
+   content: 2e-6
+   style:   25
+mosaic_light
+   content: 2e-6
+   style:   5e0
+tokyo_ghoul_aggressive
+   content: 8e-7
+   style:   80
+tokyo_ghoul_light
+   content: 1e-6
+   style:   65
+mosaic_dark_tanh_150     <- feeding rgb image instead of bgr (a wrong mistake!!!)
+   content: 2e-6
+   style:   5e0
+mosaic_right_tanh_150
+   content: 2e-6
+   style:   5e0
