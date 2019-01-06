@@ -5,12 +5,12 @@ An implementation of **fast-neural-style** in PyTorch! Style Transfer learns the
 2. `image-to-video` aesthetic style transfer, and for
 3. training `style-learning` transformation network
 
-This implemention follows the style transfer approach outlined in [**Perceptual Losses for Real-Time Style Transfer and Super-Resolution**](https://arxiv.org/abs/1603.08155) paper by *Justin Johnson, Alexandre Alahi, and Fei-Fei Li*, along with the [supplementary paper detailing the exact model architecture](https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf) of the mentioned paper. The idea is to train a `separate feed-forward neural network (called Transformation Network) to transform/stylize` an image and use backpropagation to learn its parameters, instead of directly manipulating the pixels of the generated image as discussed in [A Neural Algorithm of Artistic Style aka **neural-style**](https://arxiv.org/abs/1508.06576) paper by *Leon A. Gatys, Alexander S. Ecker, and Matthias Bethge*. The use of feed-forward transformation network allows for fast stylization of images, around 1000x faster than neural style.
+This implemention follows the style transfer approach outlined in [**Perceptual Losses for Real-Time Style Transfer and Super-Resolution**](https://arxiv.org/abs/1603.08155) paper by *Justin Johnson, Alexandre Alahi, and Fei-Fei Li*, along with the [supplementary paper detailing the exact model architecture](https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf) of the mentioned paper. The idea is to train a **`separate feed-forward neural network (called Transformation Network) to transform/stylize`** an image and use backpropagation to learn its parameters, instead of directly manipulating the pixels of the generated image as discussed in [A Neural Algorithm of Artistic Style aka **neural-style**](https://arxiv.org/abs/1508.06576) paper by *Leon A. Gatys, Alexander S. Ecker, and Matthias Bethge*. The use of feed-forward transformation network allows for fast stylization of images, around 1000x faster than neural style.
 
 This implementation made some **modifications** in Johnson et. al.'s proposed architecture, particularly:
-1. The use of `reflection padding in every Convolutional Layer`, instead of big single reflection padding before the first convolution layer
-2. `Ditching of Tanh in the output layer`. The generated image are the raw outputs of the convolutional layer. While the Tanh model produces visually pleasing results, the model fails to transfer the vibrant and loud colors of the style image (i.e. generated images are usually darker). This however makes for a good **`retro style effect`**)
-3. Use of `Instance Normalization`, instead of Batch Normalization after Convolutional and Deconvolutional layers, as discussed in [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022) paper by *Dmitry Ulyanov, Andrea Vedaldi, and Victor Lempitsky*.
+1. The use of **`reflection padding in every Convolutional Layer`**, instead of big single reflection padding before the first convolution layer
+2. **`Ditching of Tanh in the output layer`**. The generated image are the raw outputs of the convolutional layer. While the Tanh model produces visually pleasing results, the model fails to transfer the vibrant and loud colors of the style image (i.e. generated images are usually darker). This however makes for a good **`retro style effect`**)
+3. Use of **`Instance Normalization`**, instead of Batch Normalization after Convolutional and Deconvolutional layers, as discussed in [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022) paper by *Dmitry Ulyanov, Andrea Vedaldi, and Victor Lempitsky*.
 
 The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/pytorch-vgg) were used for this implementation, instead of the pretrained VGG16's in PyTorch's model zoo.
 
@@ -53,25 +53,24 @@ python train.py
 * `SAVE_MODEL_EVERY`: Frequency of saving of checkpoint and sample transformed images. 1 iteration is defined as 1 batch pass. Default is `500` with batch size of `4`, that is 2,000 images
 * `SEED`: Random seed to keep the training variations as little as possible
 
-**`transformer.py`**: contains the architecture definition of the tranformation network. It includes 2 models, `TransformerNetwork()` and `TransformerNetworkTanh()`. `TransformerNetwork` doesn't have an extra output layer, while `TransformerNetworkTanh`, as the name implies, has for its output, a Tanh layer and a default `output multiplier of 150`. `TransformerNetwork` faithfully copies the style and colorization of the style image, while Tanh model produces images with darker color; which brings a `retro style effect`. 
+**`transformer.py`**: contains the architecture definition of the tranformation network. It includes 2 models, `TransformerNetwork()` and `TransformerNetworkTanh()`. `TransformerNetwork` doesn't have an extra output layer, while `TransformerNetworkTanh`, as the name implies, has for its output, a Tanh layer and a default `output multiplier of 150`. `TransformerNetwork` faithfully copies the style and colorization of the style image, while Tanh model produces images with darker color; which brings a **`retro style effect`**.
+**Options** 
 * `norm`: sets the normalization layer to either Instance Normalization `"instance"` or Batch Normalization `"batch"`. Default is `"instance"`
 * `tanh_multiplier`: output multiplier of the Tanh model. The bigger the number, the bright the image. Default is `150`
 
 ## Stylizing Images
+**`stylize.py`**: Loads a pre-trained transformer network weight and applies style (1) to a content image or (2) to the images inside a folder
 ```
 python stylize.py
 ```
-**`stylize.py`**: Loads a pre-trained transformer network weight and applies style (1) to a content image or (2) to the images inside a folder
-
 **Options**
 * `STYLE_TRANSFORM_PATH`: path of the pre-trained weights of the the transformation network. Sample pre-trained weights are availabe in `transforms` folder, including their implementation parameters.
 
 ## Stylizing Videos
+**`video.py`**: Extracts all frames of a video, apply fast style transfer on each frames, and combine the styled frames into an output video. The output video doesn't retain the original audio. Optionally, you may use FFmpeg to merge the output video and the original video's audio.
 ```
 python video.py
 ```
-**`video.py`**: Extracts all frames of a video, apply fast style transfer on each frames, and combine the styled frames into an output video. The output video doesn't retain the original audio. Optionally, you may use FFmpeg to merge the output video and the original video's audio.
-
 **Options**
 * `VIDEO_NAME`: path of the original video
 * `FRAME_SAVE_PATH`: parent folder of the save path of the extracted original video frames. Default is `"frames/"`
@@ -108,7 +107,7 @@ master_folder
 ```
 
 ## Todo!
-* FFMPEG support for encoding videos with video style transfer
+* FFmpeg support for encoding videos with video style transfer
 * Color-preserving Real-time Style Transfer
 * Webcam demo of fast-neural-style
 * Web-app deployment of fast-neural-style (ONNX)
@@ -117,6 +116,11 @@ master_folder
 This implementation borrowed some implementation details from:
 * Justin Johnson's [fast-neural-style in Torch](https://github.com/jcjohnson/fast-neural-style), and 
 * the PyTorch Team's [PyTorch Examples: fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style)
-* This repository also borrows some markdown formatting from Logan Engstrom's [fast-style-transfer in Tensorflow](https://github.com/lengstrom/fast-style-transfer)
+* This repository also borrows some markdown formatting, as well as license description from Logan Engstrom's [fast-style-transfer in Tensorflow](https://github.com/lengstrom/fast-style-transfer)
 
 ## Related Work
+* [Neural Style in PyTorch](https://github.com/iamRusty/neural-style-pytorch) - PyTorch implementation of the original [A Neural Algorithm of Artistic Style aka **neural-style**](https://arxiv.org/abs/1508.06576) paper by Gatys et. al.
+
+## License
+
+Copyright (c) 2018 Rusty Mina. For commercial use or any purpose that is not academic or personal, please contact me at (email: rustymina at gmail dot com).Free for academic or research use, as long as proper attribution is given and this copyright notice is retained.
