@@ -3,18 +3,23 @@ import utils
 import transformer
 import cv2
 import os
-from stylize import stylize_folder_single
+from stylize import stylize_folder_single, stylize_folder
 
-VIDEO_NAME = "thankunext.mp4"
+VIDEO_NAME = "dance.mp4"
 FRAME_SAVE_PATH = "frames/"
+FRAME_CONTENT_FOLDER = "content_folder/"
 FRAME_BASE_FILE_NAME = "frame"
 FRAME_BASE_FILE_TYPE = ".jpg"
 STYLE_FRAME_SAVE_PATH = "style_frames/"
-STYLE_VIDEO_NAME = "helloworld2.mp4"
-STYLE_PATH = "transforms/mosaic_dark2.pth"
+STYLE_VIDEO_NAME = "helloworld.mp4"
+STYLE_PATH = "transforms/mosaic_aggressive.pth"
+BATCH_SIZE = 20
 
-def video_transfer(video_path):
+import time
+
+def video_transfer(video_path, style_path):
     print("OpenCV {}".format(cv2.__version__))
+    starttime = time.time()
     # Extract video info
     H, W, fps = getInfo(video_path)
     print("Height: {} Width: {} FPS: {}".format(H, W, fps))
@@ -25,11 +30,14 @@ def video_transfer(video_path):
     
     # Stylize a directory
     print("Performing style transfer on frames")
-    stylize_folder_single(STYLE_PATH, FRAME_SAVE_PATH, STYLE_FRAME_SAVE_PATH)
+    #stylize_folder_single(style_path, FRAME_SAVE_PATH, STYLE_FRAME_SAVE_PATH)
+    stylize_folder(style_path, FRAME_SAVE_PATH, STYLE_FRAME_SAVE_PATH, batch_size=BATCH_SIZE)
 
     # Combine all frames
     print("Combining style frames into one video")
     makeVideo(STYLE_FRAME_SAVE_PATH, STYLE_VIDEO_NAME, fps, int(H), int(W))
+    print("Elapsed Time: {}".format(time.time()-starttime))
+    tor
 
 def getInfo(video_path):
     """
@@ -52,7 +60,7 @@ def getFrames(video_path):
     count = 1
     success = True
     while success:
-        cv2.imwrite("{}{}{}{}".format(FRAME_SAVE_PATH, FRAME_BASE_FILE_NAME, count, FRAME_BASE_FILE_TYPE), image)
+        cv2.imwrite("{}{}{}{}".format(FRAME_SAVE_PATH+FRAME_CONTENT_FOLDER, FRAME_BASE_FILE_NAME, count, FRAME_BASE_FILE_TYPE), image)
         success, image = vidcap.read()
         count+=1
     print("Done extracting all frames")
@@ -73,4 +81,4 @@ def makeVideo(frames_path, save_name, fps, height, width):
 
     print("Done writing video")
 
-video_transfer(VIDEO_NAME)
+video_transfer(VIDEO_NAME, STYLE_PATH)
