@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from torchvision import transforms
+from torchvision import transforms, datasets
 
 # Gram Matrix
 def gram(tensor):
@@ -73,3 +73,20 @@ def ttoi(tensor):
     # Transpose from [C, H, W] -> [H, W, C]
     img = img.transpose(1, 2, 0)
     return img
+
+class ImageFolderWithPaths(datasets.ImageFolder):
+    """Custom dataset that includes image file paths. 
+    Extends torchvision.datasets.ImageFolder()
+    Reference: https://discuss.pytorch.org/t/dataloader-filenames-in-each-batch/4212/2
+    """
+    # override the __getitem__ method. this is the method dataloader calls
+    def __getitem__(self, index):
+        # this is what ImageFolder normally returns 
+        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
+
+        # the image file path
+        path = self.imgs[index][0]
+
+        # make a new tuple that includes original and the path
+        tuple_with_path = (*original_tuple, path)
+        return tuple_with_path
