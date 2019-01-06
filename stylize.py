@@ -2,7 +2,7 @@ import torch
 import utils
 import transformer
 import os
-from torchvison import datasets, transforms
+from torchvision import transforms
 
 STYLE_TRANSFORM_PATH = "transforms/mosaic_dark2.pth"
 #CONTENT_IMAGE_PATH = "images/rusty.jpg"
@@ -28,6 +28,23 @@ def stylize():
             utils.show(generated_image)
 
 def stylize_folder_single(style_path, content_folder, save_folder):
+    """
+    Reads frames/pictures as follows:
+
+    content_folder
+        pic1.ext
+        pic2.ext
+        pic3.ext
+        ...
+
+    and saves as the styled images in save_folder as follow:
+
+    save_folder
+        pic1.ext
+        pic2.ext
+        pic3.ext
+        ...
+    """
     # Device
     device = ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -54,9 +71,25 @@ def stylize_folder_single(style_path, content_folder, save_folder):
             # Save image
             utils.saveimg(generated_image, save_folder + image_name)
 
-def stylize_folder_batch(style_path, content_folder, save_folder, batch_size=1):
+def stylize_folder(style_path, folder_containing_the_content_folder, save_folder, batch_size=1):
     """Stylizes images in a folder by batch
     If the images  are of different dimensions, use transform.resize() or use a batch size of 1
+    IMPORTANT: Put content_folder inside another folder folder_containing_the_content_folder
+
+    folder_containing_the_content_folder
+        content_folder
+            pic1.ext
+            pic2.ext
+            pic3.ext
+            ...
+
+    and saves as the styled images in save_folder as follow:
+
+    save_folder
+        pic1.ext
+        pic2.ext
+        pic3.ext
+        ...
     """
     # Device
     device = ("cuda" if torch.cuda.is_available() else "cpu")
@@ -66,7 +99,7 @@ def stylize_folder_batch(style_path, content_folder, save_folder, batch_size=1):
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x.mul(255))
     ])
-    image_dataset = ImageFolderWithPaths(content_folder, transform=transform)
+    image_dataset = utils.ImageFolderWithPaths(folder_containing_the_content_folder, transform=transform)
     image_loader = torch.utils.data.DataLoader(image_dataset, batch_size=batch_size)
 
     # Load Transformer Network
@@ -81,31 +114,12 @@ def stylize_folder_batch(style_path, content_folder, save_folder, batch_size=1):
             torch.cuda.empty_cache()
 
             # Generate image
-            generated_tensor = net(content_batch).detach()
+            generated_tensor = net(content_batch.to(device)).detach()
 
             # Save images
-            count=0
-            for i in range(batch_size):
+            for i in range(len(path)):
                 generated_image = utils.ttoi(generated_tensor[i])
-                image_name = os.path.basename(*path)
+                image_name = os.path.basename(path[i])
                 utils.saveimg(generated_image, save_folder + image_name)
-                count+=1
-
-class ImageFolderWithPaths(datasets.ImageFolder):
-    """Custom dataset that includes image file paths. 
-    Extends torchvision.datasets.ImageFolder()
-    Reference: https://discuss.pytorch.org/t/dataloader-filenames-in-each-batch/4212/2
-    """
-    # override the __getitem__ method. this is the method dataloader calls
-    def __getitem__(self, index):
-        # this is what ImageFolder normally returns 
-        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
-
-        # the image file path
-        path = self.imgs[index][0]
-
-        # make a new tuple that includes original and the path
-        tuple_with_path = (*original_tuple, path)
-        return tuple_with_path
 
 #stylize()
