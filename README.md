@@ -14,9 +14,12 @@ This implementation made some **modifications** in Johnson et. al.'s proposed ar
 
 The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/pytorch-vgg) were used for this implementation, instead of the pretrained VGG16's in PyTorch's model zoo.
 
+# Image Stylization
+
 # Video Stylization
 
-# Image Stylization
+# Webcam Demo
+
 
 ## Requirements
 Most of the codes here assume that the user have access to CUDA capable GPU, at least a GTX 1050 ti or a GTX 1060
@@ -32,7 +35,7 @@ Most of the codes here assume that the user have access to CUDA capable GPU, at 
 * [FFmpeg](https://www.ffmpeg.org/) (Optional) - Insllation [Instruction here](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg)
 
 # Usage
-All arguments, parameters and options are **`hardcoded`** inside these 4 python files.  
+All arguments, parameters and options are **`hardcoded`** inside these 5 python files.  
 ## Training Style Transformation Network
 **`train.py`**: trains the transformation network that learns the style of the `style image`
 ```
@@ -83,6 +86,16 @@ python video.py
 * `BATCH_SIZE`: batch size of stylization of extracted original video frames. A 1080ti 11GB can handle a batch size of 20 for 720p videos, and 80 for a 480p videos. Dafult is `1`
 * `USE_FFMPEG`(Optional): Set to `True` if you want to use FFmpeg in extracting the original video's audio and encoding the styled video with the original audio.
 
+## Stylizing Webcam
+**`webcam.py`**: Captures and saves webcam output image, perform style transfer, and again saves a styled image. Reads the styled image and show in window. 
+```
+python webcam.py
+```
+**Options**
+* `STYLE_TRANSFORM_PATH`: pretrained weight of the style of the transformation network to use for video style transfer. Default is `"transforms/mosaic_aggressive.pth"`
+* `WIDTH`: width of the webcam output window. Default is `1280`
+* `HEIGHT`: height of the webcam output window. Default is `720`
+
 ## Files and Folder Structure
 ```
 master_folder
@@ -97,6 +110,7 @@ master_folder
  ~ images
     ~ out
         *.jpg
+      *.jpg
  ~ models
     *.pth
  ~ style_frames
@@ -109,7 +123,7 @@ master_folder
 ## Todo!
 * FFmpeg support for encoding videos with video style transfer
 * Color-preserving Real-time Style Transfer
-* Webcam demo of fast-neural-style
+* ~~Webcam demo of fast-neural-style~~
 * Web-app deployment of fast-neural-style (ONNX)
 
 ## Attribution
@@ -123,4 +137,4 @@ This implementation borrowed some implementation details from:
 
 ## License
 
-Copyright (c) 2018 Rusty Mina. For commercial use or any purpose that is not academic or personal, please contact me at (email: rustymina at gmail dot com).Free for academic or research use, as long as proper attribution is given and this copyright notice is retained.
+Copyright (c) 2018 Rusty Mina. For commercial use or any purpose that is not academic or personal, please contact me at (email: rustymina at gmail dot com). Free for academic or research use, as long as proper attribution is given and this copyright notice is retained.
