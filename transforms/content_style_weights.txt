@@ -16,3 +16,6 @@ mosaic_dark_tanh_150     <- feeding rgb image instead of bgr (a wrong mistake!!!
 mosaic_right_tanh_150
    content: 2e-6
    style:   5e0
+udnie_aggressive.pth
+   content: 1e-6
+   style:   65e0

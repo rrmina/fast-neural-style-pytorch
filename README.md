@@ -23,7 +23,7 @@ The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/py
 <img src = 'images/results/oble_ghoul.jpg' height = '250px'>
 </p>
 <p align = 'center'>
-It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. Styled like Mosaic, Udnie, and Tokyo Ghoul.
+It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. Styled like Udnie, Mosaic, and Tokyo Ghoul.
 </p>
 
 # Video Stylization
@@ -58,7 +58,7 @@ Most of the codes here assume that the user have access to CUDA capable GPU, at 
 * [FFmpeg](https://www.ffmpeg.org/) (Optional) - Installation [Instruction here](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg)
 
 # Usage
-All arguments, parameters and options are **`hardcoded`** inside these 5 python files.  
+All arguments, parameters and options are **`hardcoded`** inside these 5 python files. **Before using the codes, please arrange your files and folders [as defined below](#files-and-folder-structure)**.
 ## Training Style Transformation Network
 **`train.py`**: trains the transformation network that learns the style of the `style image`
 ```
@@ -148,6 +148,17 @@ master_folder
 * Color-preserving Real-time Style Transfer
 * ~~Webcam demo of fast-neural-style~~
 * Web-app deployment of fast-neural-style (ONNX)
+
+## Citation
+```
+  @misc{rusty2018faststyletransfer,
+    author = {Rusty Mina},
+    title = {fast-neural-style: Fast Style Transfer in Pytorch!},
+    year = {2018},
+    howpublished = {\url{https://github.com/iamRusty/fast-neural-style-pytorch}},
+    note = {commit xxxxxxx}
+  }
+```
 
 ## Attribution
 This implementation borrowed some implementation details from:
