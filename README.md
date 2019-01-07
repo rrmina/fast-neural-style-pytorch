@@ -16,10 +16,11 @@ The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/py
 
 # Image Stylization
 <p align = 'center'>
-<img src = 'images/up-diliman.jpg' height = '500px'>
-<img src = 'images/results/oble_mosaic.jpg' height = '500px'>
+<!-- <img src = 'images/up-diliman.jpg' height = '250px'> -->
 <img src = 'images/results/oble_udnie.jpg' height = '500px'>
-<img src = 'images/results/oble_ghoul.jpg' height = '500px'>
+<img src = 'images/results/oble_mosaic.jpg' height = '250px'>
+
+<img src = 'images/results/oble_ghoul.jpg' height = '250px'>
 </p>
 <p align = 'center'>
 It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. Styled like Mosaic, Udnie, and Tokyo Ghoul.
@@ -28,7 +29,7 @@ It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Phi
 # Video Stylization
 <p align = 'center'>
 <a href="https://www.youtube.com/watch?v=dB7DRsnkE3g&list=PL3freW_f-7aWsJrHTG5AKpY9TPWZgnNcm">
-<img src="https://media.giphy.com/media/3ovXrRaMGizleRUL8i/giphy.gif" height = '360px'>
+<img src="images/results/video.gif" height = '360px'>
 </a>
 </p>
 <p align = 'center'>
