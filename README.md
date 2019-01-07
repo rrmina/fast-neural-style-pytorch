@@ -9,16 +9,38 @@ This implemention follows the style transfer approach outlined in [**Perceptual 
 
 This implementation made some **modifications** in Johnson et. al.'s proposed architecture, particularly:
 1. The use of **`reflection padding in every Convolutional Layer`**, instead of big single reflection padding before the first convolution layer
-2. **`Ditching of Tanh in the output layer`**. The generated image are the raw outputs of the convolutional layer. While the Tanh model produces visually pleasing results, the model fails to transfer the vibrant and loud colors of the style image (i.e. generated images are usually darker). This however makes for a good **`retro style effect`**)
+2. **`Ditching of the Tanh output`**. The generated image are the raw outputs of the convolutional layer. While the Tanh model produces visually pleasing results, the model fails to transfer the vibrant and loud colors of the style image (i.e. generated images are usually darker). This however makes for a good **`retro style effect`**.
 3. Use of **`Instance Normalization`**, instead of Batch Normalization after Convolutional and Deconvolutional layers, as discussed in [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022) paper by *Dmitry Ulyanov, Andrea Vedaldi, and Victor Lempitsky*.
 
 The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/pytorch-vgg) were used for this implementation, instead of the pretrained VGG16's in PyTorch's model zoo.
 
 # Image Stylization
+<p align = 'center'>
+<img src = 'images/up-diliman.jpg' height = '500px'>
+<img src = 'images/results/oble_mosaic.jpg' height = '500px'>
+<img src = 'images/results/oble_udnie.jpg' height = '500px'>
+<img src = 'images/results/oble_ghoul.jpg' height = '500px'>
+</p>
+<p align = 'center'>
+It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. Styled like Mosaic, Udnie, and Tokyo Ghoul.
+</p>
 
 # Video Stylization
+<p align = 'center'>
+<a href="https://www.youtube.com/watch?v=dB7DRsnkE3g&list=PL3freW_f-7aWsJrHTG5AKpY9TPWZgnNcm">
+<img src="https://media.giphy.com/media/3ovXrRaMGizleRUL8i/giphy.gif" height = '360px'>
+</a>
+</p>
+<p align = 'center'>
+It took 6 minutes and 43 seconds to stylize a 2:11 minute-24 fps-1280x720 video on a GTX 1080 Ti. 
+</p>
 
+More videos in this [Youtube playlist](https://www.youtube.com/watch?v=dB7DRsnkE3g&list=PL3freW_f-7aWsJrHTG5AKpY9TPWZgnNcm). Unfortunately, Youtube's compression isn't friendly with style transfer videos, possibily because each frame is shaky with respect to its adjacent frames, hence obvious loss in video quality. [Raw and lossless output video can be downloaded in my Dropbox folder](https://www.dropbox.com/sh/jlfdz3ba1hu2m9x/AACLy26eHp4WVVJl-LowXq6Da?dl=0). 
 # Webcam Demo
+![Webcam Demo](images/results/webcam.gif)
+<p align = 'center'>
+<b>webcam.py</b> can output 1280x720 videos at a rate of at least 4-5 frames per second on a GTX 1060.
+</p>
 
 
 ## Requirements
@@ -32,7 +54,7 @@ Most of the codes here assume that the user have access to CUDA capable GPU, at 
 * [PyTorch](https://pytorch.org/)
 * [opencv2](https://matplotlib.org/users/installing.html)
 * [NumPy](https://www.scipy.org/install.html)
-* [FFmpeg](https://www.ffmpeg.org/) (Optional) - Insllation [Instruction here](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg)
+* [FFmpeg](https://www.ffmpeg.org/) (Optional) - Installation [Instruction here](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg)
 
 # Usage
 All arguments, parameters and options are **`hardcoded`** inside these 5 python files.  
