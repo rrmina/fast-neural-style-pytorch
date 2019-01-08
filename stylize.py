@@ -3,9 +3,11 @@ import utils
 import transformer
 import os
 from torchvision import transforms
+import time
+import cv2
 
-STYLE_TRANSFORM_PATH = "transforms/mosaic_dark2.pth"
-#CONTENT_IMAGE_PATH = "images/rusty.jpg"
+STYLE_TRANSFORM_PATH = "transforms/udnie_aggressive.pth"
+PRESERVER_COLOR = False
 
 def stylize():
     # Device
@@ -22,10 +24,15 @@ def stylize():
             print("Stylize Image~ Press Ctrl+C and Enter to close the program")
             content_image_path = input("Enter the image path: ")
             content_image = utils.load_image(content_image_path)
+            starttime = time.time()
             content_tensor = utils.itot(content_image).to(device)
             generated_tensor = net(content_tensor)
             generated_image = utils.ttoi(generated_tensor.detach())
+            if (PRESERVER_COLOR):
+                generated_image = transfer_color(content_image, generated_image)
+            print("Transfer Time: {}".format(time.time() - starttime))
             utils.show(generated_image)
+            utils.saveimg(generated_image, "helloworld.jpg")
 
 def stylize_folder_single(style_path, content_folder, save_folder):
     """
@@ -122,4 +129,21 @@ def stylize_folder(style_path, folder_containing_the_content_folder, save_folder
                 image_name = os.path.basename(path[i])
                 utils.saveimg(generated_image, save_folder + image_name)
 
-#stylize()
+def transfer_color(src, dest):
+    """
+    Transfer Color using YIQ colorspace. Useful in preserving colors in style transfer.
+    This method assumes inputs of shape [Height, Width, Channel] in BGR Color Space
+    """
+    src, dest = src.clip(0,255), dest.clip(0,255)
+        
+    # Resize src to dest's size
+    H,W,_ = src.shape 
+    dest = cv2.resize(dest, dsize=(W, H), interpolation=cv2.INTER_CUBIC)
+    
+    dest_gray = cv2.cvtColor(dest, cv2.COLOR_BGR2GRAY) #1 Extract the Destination's luminance
+    src_yiq = cv2.cvtColor(src, cv2.COLOR_BGR2YCrCb)   #2 Convert the Source from BGR to YIQ/YCbCr
+    src_yiq[...,0] = dest_gray                         #3 Combine Destination's luminance and Source's IQ/CbCr
+    
+    return cv2.cvtColor(src_yiq, cv2.COLOR_YCrCb2BGR).clip(0,255)  #4 Convert new image from YIQ back to BGR
+
+stylize()

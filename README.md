@@ -16,13 +16,14 @@ The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/py
 
 # Image Stylization
 <p align = 'center'>
-<!-- <img src = 'images/up-diliman.jpg' height = '250px'> -->
 <img src = 'images/results/oble_udnie.jpg' height = '500px'>
 <img src = 'images/results/oble_mosaic.jpg' height = '250px'>
 <img src = 'images/results/oble_ghoul.jpg' height = '250px'>
+<img src = 'images/up-diliman.jpg' height = '250px'>
+<img src = 'images/results/oble_udnie_preserve.jpg' height = '250px'>
 </p>
 <p align = 'center'>
-It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. Styled like Udnie, Mosaic, and Tokyo Ghoul.
+It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Philippines Diliman - Oblation (1400×936) by LeAnne Jazul/Rappler. From Top to Right: Udnie Style, Mosaic Style, Tokyo Ghoul Style, Original Picture, Udnie Style with Original Color Preservation
 </p>
 
 <p align = 'center'>
@@ -92,6 +93,7 @@ python train.py
 * `SEED`: Random seed to keep the training variations as little as possible
 
 **`transformer.py`**: contains the architecture definition of the tranformation network. It includes 2 models, `TransformerNetwork()` and `TransformerNetworkTanh()`. `TransformerNetwork` doesn't have an extra output layer, while `TransformerNetworkTanh`, as the name implies, has for its output, a Tanh layer and a default `output multiplier of 150`. `TransformerNetwork` faithfully copies the style and colorization of the style image, while Tanh model produces images with darker color; which brings a **`retro style effect`**.
+
 **Options** 
 * `norm`: sets the normalization layer to either Instance Normalization `"instance"` or Batch Normalization `"batch"`. Default is `"instance"`
 * `tanh_multiplier`: output multiplier of the Tanh model. The bigger the number, the bright the image. Default is `150`
@@ -103,6 +105,7 @@ python stylize.py
 ```
 **Options**
 * `STYLE_TRANSFORM_PATH`: path of the pre-trained weights of the the transformation network. Sample pre-trained weights are availabe in `transforms` folder, including their implementation parameters.
+* `PRESERVER_COLOR`: set to `True` if you want to preserve the original image's color after applying style transfer. Default value is `False`
 
 ## Stylizing Videos
 **`video.py`**: Extracts all frames of a video, apply fast style transfer on each frames, and combine the styled frames into an output video. The output video doesn't retain the original audio. Optionally, you may use FFmpeg to merge the output video and the original video's audio.
@@ -157,7 +160,7 @@ master_folder
 
 ## Todo!
 * FFmpeg support for encoding videos with video style transfer
-* Color-preserving Real-time Style Transfer
+* ~~Color-preserving Real-time Style Transfer~~
 * ~~Webcam demo of fast-neural-style~~
 * Web-app deployment of fast-neural-style (ONNX)
 
