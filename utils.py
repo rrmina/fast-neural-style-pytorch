@@ -74,6 +74,24 @@ def ttoi(tensor):
     img = img.transpose(1, 2, 0)
     return img
 
+def transfer_color(src, dest):
+    """
+    Transfer Color using YIQ colorspace. Useful in preserving colors in style transfer.
+    This method assumes inputs of shape [Height, Width, Channel] in BGR Color Space
+    """
+    src, dest = src.clip(0,255), dest.clip(0,255)
+        
+    # Resize src to dest's size
+    H,W,_ = src.shape 
+    dest = cv2.resize(dest, dsize=(W, H), interpolation=cv2.INTER_CUBIC)
+    
+    dest_gray = cv2.cvtColor(dest, cv2.COLOR_BGR2GRAY) #1 Extract the Destination's luminance
+    src_yiq = cv2.cvtColor(src, cv2.COLOR_BGR2YCrCb)   #2 Convert the Source from BGR to YIQ/YCbCr
+    src_yiq[...,0] = dest_gray                         #3 Combine Destination's luminance and Source's IQ/CbCr
+    
+    return cv2.cvtColor(src_yiq, cv2.COLOR_YCrCb2BGR).clip(0,255)  #4 Convert new image from YIQ back to BGR
+
+
 class ImageFolderWithPaths(datasets.ImageFolder):
     """Custom dataset that includes image file paths. 
     Extends torchvision.datasets.ImageFolder()

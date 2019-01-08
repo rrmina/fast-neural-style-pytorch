@@ -4,7 +4,7 @@ import torch
 import utils
 
 STYLE_TRANSFORM_PATH = "transforms/mosaic_aggressive.pth"
-PRESERVE_COLOR = `False`
+PRESERVE_COLOR = True
 WIDTH = 1280
 HEIGHT = 720
 
@@ -51,8 +51,8 @@ def webcam(style_transform_path, width=1280, height=720):
             content_tensor = utils.itot(content_image).to(device)
             generated_tensor = net(content_tensor)
             generated_image = utils.ttoi(generated_tensor.detach())
-            if (PRESERVER_COLOR):
-                generated_image = transfer_color(content_image, generated_image)
+            if (PRESERVE_COLOR):
+                generated_image = utils.transfer_color(content_image, generated_image)
             utils.saveimg(generated_image, str(count+1) + ".png")
             img2 = cv2.imread(str(count+1) + ".png")
 
