@@ -4,7 +4,7 @@ import torch
 import utils
 
 STYLE_TRANSFORM_PATH = "transforms/mosaic_aggressive.pth"
-PRESERVE_COLOR = True
+PRESERVE_COLOR = False
 WIDTH = 1280
 HEIGHT = 720
 

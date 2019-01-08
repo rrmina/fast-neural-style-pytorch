@@ -132,4 +132,4 @@ def stylize_folder(style_path, folder_containing_the_content_folder, save_folder
                 image_name = os.path.basename(path[i])
                 utils.saveimg(generated_image, save_folder + image_name)
 
-stylize()
+#stylize()
