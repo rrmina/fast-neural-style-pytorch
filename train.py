@@ -14,11 +14,10 @@ import utils
 TRAIN_IMAGE_SIZE = 256
 DATASET_PATH = "dataset"
 NUM_EPOCHS = 1
-STYLE_IMAGE_PATH = "images/tokyo2.jpg"
+STYLE_IMAGE_PATH = "images/udnie.jpg"
 BATCH_SIZE = 4 
-CONTENT_WEIGHT = 1e-7 #2e-6
-STYLE_WEIGHT = 65 #50
-TV_WEIGHT = 1e-6 
+CONTENT_WEIGHT = 1e-6 # 2e-6
+STYLE_WEIGHT = 125 # 25e0
 ADAM_LR = 0.001
 SAVE_MODEL_PATH = "models/"
 SAVE_IMAGE_PATH = "images/out/"
@@ -51,7 +50,6 @@ def train():
 
     # Get Style Features
     imagenet_neg_mean = torch.tensor([-103.939, -116.779, -123.68], dtype=torch.float32).reshape(1,3,1,1).to(device)
-    imagenet_mean = torch.tensor([103.939, 116.779, 123.68], dtype=torch.float32).reshape(1,3,1,1).to(device)
     style_image = utils.load_image(STYLE_IMAGE_PATH)
     style_tensor = utils.itot(style_image).to(device)
     style_tensor = style_tensor.add(imagenet_neg_mean)
@@ -75,9 +73,12 @@ def train():
     # Optimization/Training Loop
     batch_count = 1
     start_time = time.time()
-    for epoch in range (1, NUM_EPOCHS+1):
-        print("========Epoch {}/{}========".format(epoch, NUM_EPOCHS+1))
-        for batch_id, (content_batch, _) in enumerate(train_loader):
+    for epoch in range(NUM_EPOCHS):
+        print("========Epoch {}/{}========".format(epoch+1, NUM_EPOCHS))
+        for content_batch, _ in train_loader:
+            # Free-up unneeded cuda memory
+            torch.cuda.empty_cache()
+
             # Zero-out Gradients
             optimizer.zero_grad()
 
