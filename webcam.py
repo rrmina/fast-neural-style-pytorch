@@ -41,20 +41,17 @@ def webcam(style_transform_path, width=1280, height=720):
 
             # Mirror 
             img = cv2.flip(img, 1)
-            utils.saveimg(img, str(count) + ".png")
 
             # Free-up unneeded cuda memory
             torch.cuda.empty_cache()
             
             # Generate image
-            content_image = utils.load_image(str(count)+".png")
-            content_tensor = utils.itot(content_image).to(device)
+            content_tensor = utils.itot(img).to(device)
             generated_tensor = net(content_tensor)
             generated_image = utils.ttoi(generated_tensor.detach())
             if (PRESERVE_COLOR):
                 generated_image = utils.transfer_color(content_image, generated_image)
-            utils.saveimg(generated_image, str(count+1) + ".png")
-            img2 = cv2.imread(str(count+1) + ".png")
+            img2 = cv2.imdecode(cv2.imencode(".png", generated_image)[1], cv2.IMREAD_UNCHANGED)
 
             count += 2
             # Show webcam
