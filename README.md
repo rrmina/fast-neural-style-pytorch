@@ -186,4 +186,4 @@ This implementation borrowed some implementation details from:
 
 ## License
 
-Copyright (c) 2018 Rusty Mina. For commercial use or any purpose that is not academic or personal, please contact me at (email: rustymina at gmail dot com). Free for academic or research use, as long as proper attribution is given and this copyright notice is retained.
+Copyright (c) 2018 Rusty Mina. Free for academic or research use, as long as proper attribution is given and this copyright notice is retained.
