@@ -137,6 +137,61 @@ class TransformerResNextNetwork(nn.Module):
         out = self.DeconvBlock(x)
         return out
 
+class TransformerNetworkDenseNet(nn.Module):
+    """
+    Feedforward Transformer Network using DenseNet Block instead of Residual Block
+
+    Also, LeakyReLU is used instead of ReLU
+    """
+    def __init__(self):
+        super(TransformerNetworkDenseNet, self).__init__()
+        self.ConvBlock = nn.Sequential(
+            ConvLayerNB(3, 32, 9, 1),
+            nn.LeakyReLU(5e-2, inplace=True),
+            ConvLayerNB(32, 64, 3, 2),
+            nn.LeakyReLU(5e-2, inplace=True),
+            ConvLayerNB(64, 128, 3, 2),
+            nn.LeakyReLU(5e-2, inplace=True),
+        )
+        self.DenseBlock = nn.Sequential(
+            NormLReluConv(128, 32, 1, 1),
+            DenseLayerBottleNeck(32, 16),
+            DenseLayerBottleNeck(48, 16),
+            DenseLayerBottleNeck(64, 32),
+            DenseLayerBottleNeck(96, 16),
+            DenseLayerBottleNeck(112, 16)
+        )
+        self.DeconvBlock = nn.Sequential(
+            DeconvLayer(128, 64, 3, 2, 1),
+            nn.LeakyReLU(5e-2, inplace=True),
+            DeconvLayer(64, 32, 3, 2, 1),
+            nn.LeakyReLU(5e-2, inplace=True),
+            ConvLayerNB(32, 3, 9, 1, norm="None")
+        )
+
+    def forward(self, x):
+        x = self.ConvBlock(x)
+        x = self.DenseBlock(x)
+        out = self.DeconvBlock(x)
+        return out
+
+class DenseLayerBottleNeck(nn.Module):
+    """
+    NORM - RELU - CONV1 -> NORM - RELU - CONV3
+
+    out_channels = Growth Rate
+    """
+    def __init__(self, in_channels, out_channels):
+        super(DenseLayerBottleNeck, self).__init__()
+
+        self.conv1 = NormLReluConv(in_channels, 4*out_channels, 1, 1)
+        self.conv3 = NormLReluConv(4*out_channels, out_channels, 3, 1)
+
+    def forward(self, x):
+        out = self.conv3(self.conv1(x))
+        out = torch.cat((x, out), 1)
+        return out
+
 class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
         super(ConvLayer, self).__init__()
@@ -146,6 +201,32 @@ class ConvLayer(nn.Module):
 
         # Convolution Layer
         self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+        # Normalization Layers
+        self.norm_type = norm
+        if (norm=="instance"):
+            self.norm_layer = nn.InstanceNorm2d(out_channels, affine=True)
+        elif (norm=="batch"):
+            self.norm_layer = nn.BatchNorm2d(out_channels, affine=True)
+
+    def forward(self, x):
+        x = self.reflection_pad(x)
+        x = self.conv_layer(x)
+        if (self.norm_type=="None"):
+            out = x
+        else:
+            out = self.norm_layer(x)
+        return out
+
+class ConvLayerNB(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
+        super(ConvLayerNB, self).__init__()
+        # Padding Layers
+        padding_size = kernel_size // 2
+        self.reflection_pad = nn.ReflectionPad2d(padding_size)
+
+        # Convolution Layer
+        self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, bias=False)
 
         # Normalization Layers
         self.norm_type = norm
@@ -229,7 +310,7 @@ class ResNextLayer(nn.Module):
 
 class NormReluConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
-        super(NormConv, self).__init__()
+        super(NormReluConv, self).__init__()
 
         # Normalization Layers
         if (norm=="instance"):
@@ -246,6 +327,33 @@ class NormReluConv(nn.Module):
 
         # Convolution Layer
         self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        x = self.norm_layer(x)
+        x = self.relu_layer(x)
+        x = self.reflection_pad(x)
+        x = self.conv_layer(x)
+        return x
+
+class NormLReluConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
+        super(NormLReluConv, self).__init__()
+
+        # Normalization Layers
+        if (norm=="instance"):
+            self.norm_layer = nn.InstanceNorm2d(in_channels, affine=True)
+        elif (norm=="batch"):
+            self.norm_layer = nn.BatchNorm2d(in_channels, affine=True)
+
+        # ReLU Layer
+        self.relu_layer = nn.LeakyReLU(5e-2, inplace=True)
+
+        # Padding Layers
+        padding_size = kernel_size // 2
+        self.reflection_pad = nn.ReflectionPad2d(padding_size)
+
+        # Convolution Layer
+        self.conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, bias=False)
 
     def forward(self, x):
         x = self.norm_layer(x)
