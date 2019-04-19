@@ -80,33 +80,31 @@ class TransformerResNextNetwork(nn.Module):
 class TransformerNetworkDenseNet(nn.Module):
     """
     Feedforward Transformer Network using DenseNet Block instead of Residual Block
-
-    Also, LeakyReLU is used instead of ReLU
     """
     def __init__(self):
         super(TransformerNetworkDenseNet, self).__init__()
         self.ConvBlock = nn.Sequential(
-            ConvLayerNB(3, 32, 9, 1),
-            nn.LeakyReLU(5e-2, inplace=True),
+            ConvLayerNB(3, 16, 9, 1),
+            nn.ReLU(),
+            ConvLayerNB(16, 32, 3, 2),
+            nn.ReLU(),
             ConvLayerNB(32, 64, 3, 2),
-            nn.LeakyReLU(5e-2, inplace=True),
-            ConvLayerNB(64, 128, 3, 2),
-            nn.LeakyReLU(5e-2, inplace=True),
+            nn.ReLU()
         )
         self.DenseBlock = nn.Sequential(
-            NormLReluConv(128, 32, 1, 1),
-            DenseLayerBottleNeck(32, 16),
-            DenseLayerBottleNeck(48, 16),
-            DenseLayerBottleNeck(64, 32),
+            DenseLayerBottleNeck(64, 16),
+            DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
-            DenseLayerBottleNeck(112, 16)
+            DenseLayerBottleNeck(112, 16),
+            DenseLayerBottleNeck(128, 16),
+            NormLReluConv(144, 64, 1, 1)
         )
         self.DeconvBlock = nn.Sequential(
-            DeconvLayer(128, 64, 3, 2, 1),
-            nn.LeakyReLU(5e-2, inplace=True),
-            DeconvLayer(64, 32, 3, 2, 1),
-            nn.LeakyReLU(5e-2, inplace=True),
-            ConvLayerNB(32, 3, 9, 1, norm="None")
+            UpsampleConvLayer(64, 32, 3, 1, 2),
+            nn.ReLU(),
+            UpsampleConvLayer(32, 16, 3, 1, 2),
+            nn.ReLU(),
+            ConvLayerNB(16, 3, 9, 1, norm="None")
         )
 
     def forward(self, x):
@@ -114,6 +112,61 @@ class TransformerNetworkDenseNet(nn.Module):
         x = self.DenseBlock(x)
         out = self.DeconvBlock(x)
         return out
+
+class TransformerNetworkUNetDenseNetResNet(nn.Module):
+    """
+    Feedforward Transformer Network using DenseNet Block instead of Residual Block
+    """
+    def __init__(self):
+        super(TransformerNetworkUNetDenseNetResNet, self).__init__()
+        self.C1 = ConvLayerNB(3, 16, 9, 1)
+        self.RC1 = nn.ReLU()
+        self.C2 = ConvLayerNB(16, 32, 3, 2)
+        self.RC2 = nn.ReLU()
+        self.C3 = ConvLayerNB(32, 64, 3, 2)
+        self.RC3 = nn.ReLU()
+        self.DenseBlock = nn.Sequential(
+            DenseLayerBottleNeck(64, 16),
+            DenseLayerBottleNeck(80, 16),
+            DenseLayerBottleNeck(96, 16),
+            DenseLayerBottleNeck(112, 16),
+            DenseLayerBottleNeck(128, 16),
+            NormLReluConv(144, 64, 1, 1)
+        )
+        self.RD0 = nn.ReLU()
+        self.D1 = UpsampleConvLayer(64, 32, 3, 1, 2)
+        self.RD1 = nn.ReLU()
+        self.D2 = UpsampleConvLayer(32, 16, 3, 1, 2)
+        self.RD2 = nn.ReLU()
+        self.D3 = ConvLayerNB(16, 3, 9, 1, norm="None")
+        self.RD3 = nn.ReLU()
+
+    def forward(self, x):
+        # Decoder
+        x = self.RC1(self.C1(x))
+        i1 = x
+        x = self.RC2(self.C2(x))
+        i2 = x
+        x = self.RC3(self.C3(x))
+        i3 = x
+        
+        # Dense Block
+        x = self.DenseBlock(x)
+        x = i3 + x
+        x = self.RD0(x)
+
+        # Encoder
+        x = self.D1(x)
+        x = x + i2
+        x = self.RD1(x)
+        x = self.D2(x)
+        x = x + i3
+        x = self.RD2(x)
+        x = self.D3(x)
+        x = x + i1
+        x = self.RD3(x)
+        
+        return x
 
 class DenseLayerBottleNeck(nn.Module):
     """
@@ -241,7 +294,7 @@ class NormLReluConv(nn.Module):
             self.norm_layer = nn.BatchNorm2d(in_channels, affine=True)
 
         # ReLU Layer
-        self.relu_layer = nn.LeakyReLU(5e-2, inplace=True)
+        self.relu_layer = nn.ReLU()
 
         # Padding Layers
         padding_size = kernel_size // 2
@@ -281,6 +334,28 @@ class ConvLayer(nn.Module):
             out = x
         else:
             out = self.norm_layer(x)
+        return out
+
+class UpsampleConvLayer(torch.nn.Module):
+    """UpsampleConvLayer
+    Upsamples the input and then does a convolution. This method gives better results
+    compared to ConvTranspose2d.
+    ref: http://distill.pub/2016/deconv-checkerboard/
+    """
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
+        super(UpsampleConvLayer, self).__init__()
+        self.upsample = upsample
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = torch.nn.ReflectionPad2d(reflection_padding)
+        self.conv2d = torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        x_in = x
+        if self.upsample:
+            x_in = torch.nn.functional.interpolate(x_in, mode='nearest', scale_factor=self.upsample)
+        out = self.reflection_pad(x_in)
+        out = self.conv2d(out)
         return out
 
 class DeconvLayer(nn.Module):
