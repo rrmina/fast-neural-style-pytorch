@@ -84,27 +84,26 @@ class TransformerNetworkDenseNet(nn.Module):
     def __init__(self):
         super(TransformerNetworkDenseNet, self).__init__()
         self.ConvBlock = nn.Sequential(
-            ConvLayerNB(3, 16, 9, 1),
-            nn.ReLU(),
-            ConvLayerNB(16, 32, 3, 2),
+            ConvLayerNB(3, 32, 9, 1),
             nn.ReLU(),
             ConvLayerNB(32, 64, 3, 2),
+            nn.ReLU(),
+            ConvLayerNB(64, 128, 3, 2),
             nn.ReLU()
         )
         self.DenseBlock = nn.Sequential(
+            NormReluConv(128, 64)
             DenseLayerBottleNeck(64, 16),
             DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
-            DenseLayerBottleNeck(112, 16),
-            DenseLayerBottleNeck(128, 16),
-            NormLReluConv(144, 64, 1, 1)
+            DenseLayerBottleNeck(112, 16)
         )
         self.DeconvBlock = nn.Sequential(
-            UpsampleConvLayer(64, 32, 3, 1, 2),
+            DeconvLayer(128, 64, 3, 2, 1),
             nn.ReLU(),
-            UpsampleConvLayer(32, 16, 3, 1, 2),
+            DeconvLayer(64, 32, 3, 2, 1),
             nn.ReLU(),
-            ConvLayerNB(16, 3, 9, 1, norm="None")
+            ConvLayer(32, 3, 9, 1, norm="None")
         )
 
     def forward(self, x):
@@ -119,27 +118,25 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
     """
     def __init__(self):
         super(TransformerNetworkUNetDenseNetResNet, self).__init__()
-        self.C1 = ConvLayerNB(3, 16, 9, 1)
+        self.C1 = ConvLayerNB(3, 32, 9, 1)
         self.RC1 = nn.ReLU()
-        self.C2 = ConvLayerNB(16, 32, 3, 2)
+        self.C2 = ConvLayerNB(32, 64, 3, 2)
         self.RC2 = nn.ReLU()
-        self.C3 = ConvLayerNB(32, 64, 3, 2)
+        self.C3 = ConvLayerNB(64, 128, 3, 2)
         self.RC3 = nn.ReLU()
         self.DenseBlock = nn.Sequential(
+            NormReluConv(128, 64),
             DenseLayerBottleNeck(64, 16),
             DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
-            DenseLayerBottleNeck(112, 16),
-            DenseLayerBottleNeck(128, 16),
-            NormLReluConv(144, 64, 1, 1)
+            DenseLayerBottleNeck(112, 16)
         )
         self.RD0 = nn.ReLU()
-        self.D1 = UpsampleConvLayer(64, 32, 3, 1, 2)
+        self.D1 = UpsampleConvLayer(128, 64, 3, 1, 2)
         self.RD1 = nn.ReLU()
-        self.D2 = UpsampleConvLayer(32, 16, 3, 1, 2)
+        self.D2 = UpsampleConvLayer(64, 32, 3, 1, 2)
         self.RD2 = nn.ReLU()
-        self.D3 = ConvLayerNB(16, 3, 9, 1, norm="None")
-        self.RD3 = nn.ReLU()
+        self.D3 = ConvLayerNB(32, 3, 9, 1, norm="None")
 
     def forward(self, x):
         # Decoder
@@ -160,11 +157,9 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
         x = x + i2
         x = self.RD1(x)
         x = self.D2(x)
-        x = x + i3
+        x = x + i1
         x = self.RD2(x)
         x = self.D3(x)
-        x = x + i1
-        x = self.RD3(x)
         
         return x
 
