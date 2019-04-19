@@ -84,8 +84,8 @@ python train.py
 * `NUM_EPOCHS`: Number of epochs of training pass. Default is `1` with 40,000 training images
 * `STYLE_IMAGE_PATH`: path of the style image
 * `BATCH_SIZE`: training batch size. Default is 4 
-* `CONTENT_WEIGHT`: Multiplier weight of the loss between content representations and the generated image. Default is `2e-6`
-* `STYLE_WEIGHT`: Multiplier weight of the loss between style representations and the generated image. Default is `5e0`
+* `CONTENT_WEIGHT`: Multiplier weight of the loss between content representations and the generated image. Default is `8`
+* `STYLE_WEIGHT`: Multiplier weight of the loss between style representations and the generated image. Default is `50`
 * `ADAM_LR`: learning rate of the adam optimizer. Default is `0.001`
 * `SAVE_MODEL_PATH`: path of pretrained-model weights and transformation network checkpoint files. Default is `"models/"`
 * `SAVE_IMAGE_PATH`: save path of sample tranformed training images. Default is `"images/out/"`

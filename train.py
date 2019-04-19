@@ -14,10 +14,10 @@ import utils
 TRAIN_IMAGE_SIZE = 256
 DATASET_PATH = "dataset"
 NUM_EPOCHS = 1
-STYLE_IMAGE_PATH = "images/udnie.jpg"
+STYLE_IMAGE_PATH = "images/mosaic.jpg"
 BATCH_SIZE = 4 
-CONTENT_WEIGHT = 8 # 17
-STYLE_WEIGHT = 125 # 25
+CONTENT_WEIGHT = 17 # 17
+STYLE_WEIGHT = 50 # 25
 ADAM_LR = 0.001
 SAVE_MODEL_PATH = "models/"
 SAVE_IMAGE_PATH = "images/out/"
