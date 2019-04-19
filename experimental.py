@@ -125,7 +125,7 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
         self.C3 = ConvLayerNB(64, 128, 3, 2)
         self.RC3 = nn.ReLU()
         self.DenseBlock = nn.Sequential(
-            NormReluConv(128, 64),
+            NormReluConv(128, 64, 1, 1),
             DenseLayerBottleNeck(64, 16),
             DenseLayerBottleNeck(80, 16),
             DenseLayerBottleNeck(96, 16),
