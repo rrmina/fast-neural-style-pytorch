@@ -77,6 +77,45 @@ class TransformerResNextNetwork(nn.Module):
         out = self.DeconvBlock(x)
         return out
 
+class TransformerResNextNetwork_Pruned(nn.Module):
+    """
+    Feedforward Transformation Network - ResNeXt
+    
+        - No Tanh
+        + ResNeXt Layer
+        + Pruned
+        Reference: https://heartbeat.fritz.ai/creating-a-17kb-style-transfer-model-with-layer-pruning-and-quantization-864d7cc53693 
+    """
+    def __init__(self, alpha=1.0):
+        super(TransformerResNextNetwork_Pruned, self).__init__()
+        a = alpha
+        self.ConvBlock = nn.Sequential(
+            ConvLayer(3, int(a*32), 9, 1),
+            nn.ReLU(),
+            ConvLayer(int(a*32), int(a*32), 3, 2),
+            nn.ReLU(),
+            ConvLayer(int(a*32), int(a*32), 3, 2),
+            nn.ReLU()
+        )
+        self.ResidualBlock = nn.Sequential(
+            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
+            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
+            ResNextLayer(int(a*32), [int(a*16), int(a*16), int(a*32)], kernel_size=3),
+        )
+        self.DeconvBlock = nn.Sequential(
+            DeconvLayer(int(a*32), int(a*32), 3, 2, 1),
+            nn.ReLU(),
+            DeconvLayer(int(a*32), int(a*32), 3, 2, 1),
+            nn.ReLU(),
+            ConvLayer(int(a*32), 3, 9, 1, norm="None")
+        )
+
+    def forward(self, x):
+        x = self.ConvBlock(x)
+        x = self.ResidualBlock(x)
+        out = self.DeconvBlock(x)
+        return out
+
 class TransformerNetworkDenseNet(nn.Module):
     """
     Feedforward Transformer Network using DenseNet Block instead of Residual Block
