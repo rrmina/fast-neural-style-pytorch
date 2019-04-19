@@ -16,8 +16,8 @@ DATASET_PATH = "dataset"
 NUM_EPOCHS = 1
 STYLE_IMAGE_PATH = "images/udnie.jpg"
 BATCH_SIZE = 4 
-CONTENT_WEIGHT = 1e-6 # 2e-6
-STYLE_WEIGHT = 125 # 25e0
+CONTENT_WEIGHT = 8 # 17
+STYLE_WEIGHT = 125 # 25
 ADAM_LR = 0.001
 SAVE_MODEL_PATH = "models/"
 SAVE_IMAGE_PATH = "images/out/"
@@ -76,6 +76,9 @@ def train():
     for epoch in range(NUM_EPOCHS):
         print("========Epoch {}/{}========".format(epoch+1, NUM_EPOCHS))
         for content_batch, _ in train_loader:
+            # Get current batch size in case of odd batch sizes
+            curr_batch_size = content_batch.shape[0]
+
             # Free-up unneeded cuda memory
             torch.cuda.empty_cache()
 
@@ -96,7 +99,7 @@ def train():
             # Style Loss
             style_loss = 0
             for key, value in generated_features.items():
-                s_loss = MSELoss(utils.gram(value), style_gram[key])
+                s_loss = MSELoss(utils.gram(value), style_gram[key][:curr_batch_size])
                 style_loss += s_loss
             style_loss *= STYLE_WEIGHT
             batch_style_loss_sum += style_loss
