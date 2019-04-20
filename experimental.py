@@ -188,15 +188,28 @@ class TransformerNetworkUNetDenseNetResNet(nn.Module):
         
         # Dense Block
         x = self.DenseBlock(x)
-        x = i3 + x
+        if (x.shape != i3.shape):
+            sh = i3.shape
+            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i3
+        else:
+            x = x + i3
         x = self.RD0(x)
 
         # Encoder
         x = self.D1(x)
-        x = x + i2
+        if (x.shape != i2.shape):
+            sh = i2.shape
+            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i2
+        else:
+            x = x + i2
+
         x = self.RD1(x)
         x = self.D2(x)
-        x = x + i1
+        if (x.shape != i1.shape):
+            sh = i1.shape
+            x = x[:sh[0], :sh[1], :sh[2], :sh[3]] + i1
+        else:
+            x = x + i1
         x = self.RD2(x)
         x = self.D3(x)
         
