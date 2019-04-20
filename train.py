@@ -103,7 +103,7 @@ def train():
                 s_loss = MSELoss(utils.gram(value), style_gram[key][:curr_batch_size])
                 style_loss += s_loss
             style_loss *= STYLE_WEIGHT
-            batch_style_loss_sum += style_loss
+            batch_style_loss_sum += style_loss.item()
 
             # Total Loss
             total_loss = content_loss + style_loss
@@ -135,9 +135,9 @@ def train():
                 print("Saved sample tranformed image at {}".format(sample_image_path))
 
                 # Save loss histories
-                content_loss_history.append((batch_total_loss_sum/batch_count).item())
-                style_loss_history.append((batch_style_loss_sum/batch_count).item())
-                total_loss_history.append((batch_total_loss_sum/batch_count).item())
+                content_loss_history.append(batch_total_loss_sum/batch_count)
+                style_loss_history.append(batch_style_loss_sum/batch_count)
+                total_loss_history.append(batch_total_loss_sum/batch_count)
 
             # Iterate Batch Counter
             batch_count+=1
