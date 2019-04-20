@@ -92,11 +92,16 @@ python train.py
 * `SAVE_MODEL_EVERY`: Frequency of saving of checkpoint and sample transformed images. 1 iteration is defined as 1 batch pass. Default is `500` with batch size of `4`, that is 2,000 images
 * `SEED`: Random seed to keep the training variations as little as possible
 
-**`transformer.py`**: contains the architecture definition of the tranformation network. It includes 2 models, `TransformerNetwork()` and `TransformerNetworkTanh()`. `TransformerNetwork` doesn't have an extra output layer, while `TransformerNetworkTanh`, as the name implies, has for its output, a Tanh layer and a default `output multiplier of 150`. `TransformerNetwork` faithfully copies the style and colorization of the style image, while Tanh model produces images with darker color; which brings a **`retro style effect`**.
+**`transformer.py`**: contains the architecture definition of the trasnformation network. It includes 2 models, `TransformerNetwork()` and `TransformerNetworkTanh()`. `TransformerNetwork` doesn't have an extra output layer, while `TransformerNetworkTanh`, as the name implies, has for its output, a Tanh layer and a default `output multiplier of 150`. `TransformerNetwork` faithfully copies the style and colorization of the style image, while Tanh model produces images with darker color; which brings a **`retro style effect`**.
 
 **Options** 
 * `norm`: sets the normalization layer to either Instance Normalization `"instance"` or Batch Normalization `"batch"`. Default is `"instance"`
 * `tanh_multiplier`: output multiplier of the Tanh model. The bigger the number, the bright the image. Default is `150`
+
+**`experimental.py`**: contains the model definitions of the experimental transformer network architectures. These experimental transformer networks largely borrowed ideas from the papers [Aggregated Residual Transformations for Deep Neural Networks](https://arxiv.org/abs/1611.05431) or more commonly known as `ResNeXt`, and [Densely Connected Convolutional Networks](https://arxiv.org/abs/1608.06993) or more commonly known as `DenseNet`. These experimental networks are designed to be lightweight, with the goal of minimizing the compute and memory needed for better real-time performance. 
+
+See [table below for the comparison of different transformer networks](#comparison-of-different-transformer-networks).
+
 
 ## Stylizing Images
 **`stylize.py`**: Loads a pre-trained transformer network weight and applies style (1) to a content image or (2) to the images inside a folder
@@ -120,7 +125,7 @@ python video.py
 * `FRAME_BASE_FILE_TYPE`: save image file time ".jpg"
 * `STYLE_FRAME_SAVE_PATH`: path of the styled frames. Default is `"style_frames/"`
 * `STYLE_VIDEO_NAME`: name(or save path) of the output styled video. Default is `"helloworld.mp4"`
-* `STYLE_PATH`: pretrained weight of the style of the transformation network to use for video style transfer. Default is `"transforms/mosaic_aggressive.pth"`
+* `STYLE_PATH`: pretrained weight of the style of the transformation network to use for video style transfer. Default is `"transforms/aggressive.pth"`
 * `BATCH_SIZE`: batch size of stylization of extracted original video frames. A 1080ti 11GB can handle a batch size of 20 for 720p videos, and 80 for a 480p videos. Dafult is `1`
 * `USE_FFMPEG`(Optional): Set to `True` if you want to use FFmpeg in extracting the original video's audio and encoding the styled video with the original audio.
 
@@ -130,7 +135,7 @@ python video.py
 python webcam.py
 ```
 **Options**
-* `STYLE_TRANSFORM_PATH`: pretrained weight of the style of the transformation network to use for video style transfer. Default is `"transforms/mosaic_aggressive.pth"`
+* `STYLE_TRANSFORM_PATH`: pretrained weight of the style of the transformation network to use for video style transfer. Default is `"transforms/aggressive.pth"`
 * `WIDTH`: width of the webcam output window. Default is `1280`
 * `HEIGHT`: height of the webcam output window. Default is `720`
 
@@ -157,6 +162,21 @@ master_folder
     *.pth
  *.py
 ```
+
+## Comparison of Different Transformer Networks
+
+|                       Network                      | size (Kb) | no. of parameters | final loss (million) |
+|:--------------------------------------------------:|-----------|-------------------|----------------------|
+| transformer/TransformerNetwork                     |     6,573 |         1,679,235 |                 9.88 |
+| experimental/TransformerNetworkDenseNet            |     1,064 |           269,731 |                11.37 |
+| experimental/TransformerNetworkUNetDenseNetResNet  |     1,062 |           269,536 |                12.32 |
+| experimental/TransformerNetworkV2                  |     6,573 |         1,679,235 |                10.05 |
+| experimental/TransformerResNextNetwork             |     1,857 |           470,915 |                10.31 |
+| experimental/TransformerResNextNetwork_Pruned(0.3) |        44 |             8,229 |                19.29 |
+| experimental/TransformerResNextNetwork_Pruned(1.0) |       260 |            63,459 |                12.72 |
+
+
+`TransformerResNextNetwork` and `TransformerResNextNetwork_Pruned(1.0)` provides the best tradeoff between compute, memory size, and performance.
 
 ## Todo!
 * FFmpeg support for encoding videos with video style transfer
