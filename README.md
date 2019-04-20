@@ -166,7 +166,7 @@ master_folder
 ## Comparison of Different Transformer Networks
 
 |                       Network                      | size (Kb) | no. of parameters | final loss (million) |
-|:--------------------------------------------------:|-----------|-------------------|----------------------|
+|:---------------------------------------------------|----------:|------------------:|---------------------:|
 | transformer/TransformerNetwork                     |     6,573 |         1,679,235 |                 9.88 |
 | experimental/TransformerNetworkDenseNet            |     1,064 |           269,731 |                11.37 |
 | experimental/TransformerNetworkUNetDenseNetResNet  |     1,062 |           269,536 |                12.32 |
