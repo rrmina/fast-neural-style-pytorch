@@ -91,6 +91,18 @@ def transfer_color(src, dest):
     
     return cv2.cvtColor(src_yiq, cv2.COLOR_YCrCb2BGR).clip(0,255)  #4 Convert new image from YIQ back to BGR
 
+def plot_loss_hist(c_loss, s_loss, total_loss, title="Loss History"):
+    x = [i for i in range(len(total_loss))]
+    plt.figure(figsize=[10, 6])
+    plt.plot(x, c_loss, label="Content Loss")
+    plt.plot(x, s_loss, label="Style Loss")
+    plt.plot(x, total_loss, label="Total Loss")
+    
+    plt.legend()
+    plt.xlabel('Every 500 iterations')
+    plt.ylabel('Loss')
+    plt.title(title)
+    plt.show()
 
 class ImageFolderWithPaths(datasets.ImageFolder):
     """Custom dataset that includes image file paths. 

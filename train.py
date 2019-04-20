@@ -23,6 +23,7 @@ SAVE_MODEL_PATH = "models/"
 SAVE_IMAGE_PATH = "images/out/"
 SAVE_MODEL_EVERY = 500 # 2,000 Images with batch size 4
 SEED = 35
+PLOT_LOSS = 1
 
 def train():
     # Seeds
@@ -134,9 +135,9 @@ def train():
                 print("Saved sample tranformed image at {}".format(sample_image_path))
 
                 # Save loss histories
-                content_loss_history.append(batch_total_loss_sum/batch_count)
-                style_loss_history.append(batch_style_loss_sum/batch_count)
-                total_loss_history.append(batch_total_loss_sum/batch_count)
+                content_loss_history.append((batch_total_loss_sum/batch_count).item())
+                style_loss_history.append((batch_style_loss_sum/batch_count).item())
+                total_loss_history.append((batch_total_loss_sum/batch_count).item())
 
             # Iterate Batch Counter
             batch_count+=1
@@ -159,5 +160,9 @@ def train():
     print("Saving TransformerNetwork weights at {}".format(final_path))
     torch.save(TransformerNetwork.state_dict(), final_path)
     print("Done saving final model")
+
+    # Plot Loss Histories
+    if (PLOT_LOSS):
+        utils.plot_loss_hist(content_loss_history, style_loss_history, total_loss_history)
 
 train()
