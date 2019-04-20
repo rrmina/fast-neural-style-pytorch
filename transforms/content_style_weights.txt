@@ -1,3 +1,9 @@
+#####################################
+#### Default TransformerNetwork #####
+#####################################
+mosaic_TransformerNetwork
+   content: 17
+   style:   50
 mosaic_aggressive
    content: 17
    style:   25
@@ -10,6 +16,10 @@ tokyo_ghoul_aggressive
 tokyo_ghoul_light
    content: 8
    style:   65
+
+#######################################
+#### Transformer Network with Tanh ####
+#######################################
 mosaic_dark_tanh_150     <- feeding rgb image instead of bgr (a wrong mistake!!!)
    content: 17
    style:   5
@@ -19,3 +29,32 @@ mosaic_right_tanh_150
 udnie_aggressive.pth
    content: 8
    style:   65
+
+###############################
+#### EXPERIMENTAL NETWORKS ####
+#### Lightweight and Fast  ####
+###############################
+
+mosaic_TransformerNetworkDenseNet              1,064 Kb
+   content: 17
+   style:   50
+
+mosaic_TransformerNetworkUNetDenseNetResNet    1,062 Kb
+   content: 17
+   style:   50
+
+mosaic_TransformerNetworkV2                    6,573 Kb
+   content: 17
+   style:   50
+
+mosaic_TransformerResNextNetwork               1,857 Kb
+   content: 17
+   style:   50
+
+mosaic_TransformerResNextNetwork_Pruned03         44 Kb
+   content: 17
+   style:   50
+
+mosaic_TransformerResNextNetwork_Pruned10        260 Kb
+   content: 17
+   style:   50
