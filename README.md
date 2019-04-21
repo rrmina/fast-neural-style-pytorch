@@ -49,7 +49,8 @@ It took about <b>1.5 seconds</b> for a GTX 1060 to stylize University of the Phi
 It took 6 minutes and 43 seconds to stylize a 2:11 minute-24 fps-1280x720 video on a GTX 1080 Ti. 
 </p>
 
-More videos in this [Youtube playlist](https://www.youtube.com/watch?v=dB7DRsnkE3g&list=PL3freW_f-7aWsJrHTG5AKpY9TPWZgnNcm). Unfortunately, Youtube's compression isn't friendly with style transfer videos, possibily because each frame is shaky with respect to its adjacent frames, hence obvious loss in video quality. [Raw and lossless output video can be downloaded in my Dropbox folder](https://www.dropbox.com/sh/jlfdz3ba1hu2m9x/AACLy26eHp4WVVJl-LowXq6Da?dl=0). 
+More videos in this [Youtube playlist](https://www.youtube.com/watch?v=dB7DRsnkE3g&list=PL3freW_f-7aWsJrHTG5AKpY9TPWZgnNcm). Unfortunately, Youtube's compression isn't friendly with style transfer videos, possibily because each frame is shaky with respect to its adjacent frames, hence obvious loss in video quality. `Raw and lossless output video can be downloaded in my` [Dropbox folder](https://www.dropbox.com/sh/ynlie98f1lb4csz/AAC4utgi8HrS_D7XDU-9FXoAa?dl=0), or [Gdrive Folder](https://drive.google.com/open?id=1uplUkayaTiThURmQTAuUqeAKuQeLxXCc)
+
 # Webcam Demo
 ![Webcam Demo](images/results/webcam.gif)
 <p align = 'center'>
@@ -102,6 +103,7 @@ python train.py
 
 See [table below for the comparison of different transformer networks](#comparison-of-different-transformer-networks).
 
+See [transforms folder](https://github.com/rrmina/fast-neural-style-pytorch/tree/master/transforms) for some pretrained weights. For more pretrained weights, see my [Gdrive](https://drive.google.com/open?id=1m9g1PP7gPo-jPfRDxzdGozMzftu3az6P) or [Dropbox](https://www.dropbox.com/sh/066lk1m5sgkhtmi/AAAqVwNhCHsrK2p8Xil1ftH4a?dl=0).
 
 ## Stylizing Images
 **`stylize.py`**: Loads a pre-trained transformer network weight and applies style (1) to a content image or (2) to the images inside a folder
