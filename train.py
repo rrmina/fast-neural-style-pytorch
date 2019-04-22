@@ -94,7 +94,7 @@ def train():
 
             # Content Loss
             MSELoss = nn.MSELoss().to(device)
-            content_loss = CONTENT_WEIGHT * MSELoss(content_features['relu2_2'], generated_features['relu2_2'])            
+            content_loss = CONTENT_WEIGHT * MSELoss(generated_features['relu2_2'], content_features['relu2_2'])            
             batch_content_loss_sum += content_loss
 
             # Style Loss
