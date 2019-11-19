@@ -3,7 +3,7 @@ import transformer
 import torch
 import utils
 
-STYLE_TRANSFORM_PATH = "transforms/mosaic_aggressive.pth"
+STYLE_TRANSFORM_PATH = "transforms/mosaic.pth"
 PRESERVE_COLOR = False
 WIDTH = 1280
 HEIGHT = 720
@@ -34,7 +34,6 @@ def webcam(style_transform_path, width=1280, height=720):
 
     # Main loop
     with torch.no_grad():
-        count = 1
         while True:
             # Get webcam input
             ret_val, img = cam.read()
@@ -50,15 +49,15 @@ def webcam(style_transform_path, width=1280, height=720):
             generated_tensor = net(content_tensor)
             generated_image = utils.ttoi(generated_tensor.detach())
             if (PRESERVE_COLOR):
-                generated_image = utils.transfer_color(content_image, generated_image)
-            img2 = cv2.imdecode(cv2.imencode(".png", generated_image)[1], cv2.IMREAD_UNCHANGED)
+                generated_image = utils.transfer_color(img, generated_image)
 
-            count += 2
+            generated_image = generated_image / 255
+
             # Show webcam
-            cv2.imshow('Demo webcam', img2)
+            cv2.imshow('Demo webcam', generated_image)
             if cv2.waitKey(1) == 27: 
                 break  # esc to quit
-        
+            
     # Free-up memories
     cam.release()
     cv2.destroyAllWindows()
