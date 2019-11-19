@@ -12,10 +12,6 @@ def webcam(style_transform_path, width=1280, height=720):
     """
     Captures and saves an image, perform style transfer, and again saves the styled image.
     Reads the styled image and show in window. 
-
-    Saving and loading SHOULD BE eliminated, however this produces too much whitening in
-    the "generated styled image". This may be caused by the async nature of VideoCapture,
-    and I don't know how to fix it. 
     """
     # Device
     device = ("cuda" if torch.cuda.is_available() else "cpu")
