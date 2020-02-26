@@ -12,7 +12,7 @@ This implementation made some **modifications** in Johnson et. al.'s proposed ar
 2. **`Ditching of the Tanh output`**. The generated image are the raw outputs of the convolutional layer. While the Tanh model produces visually pleasing results, the model fails to transfer the vibrant and loud colors of the style image (i.e. generated images are usually darker). This however makes for a good **`retro style effect`**.
 3. Use of **`Instance Normalization`**, instead of Batch Normalization after Convolutional and Deconvolutional layers, as discussed in [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022) paper by *Dmitry Ulyanov, Andrea Vedaldi, and Victor Lempitsky*.
 
-The [original caffe pretrained weights of VGG16](https://drive.google.com/file/d/1a0sFcNEvmIy21PE0yp7tzJuU0vhhV0Ln/view?usp=sharing) were used for this implementation, instead of the pretrained VGG16's in PyTorch's model zoo.
+The [original caffe pretrained weights of VGG16](https://github.com/jcjohnson/pytorch-vgg) were used for this implementation, instead of the pretrained VGG16's in PyTorch's model zoo.
 
 # Image Stylization
 <p align = 'center'>
@@ -61,7 +61,7 @@ More videos in this [Youtube playlist](https://www.youtube.com/watch?v=dB7DRsnkE
 ## Requirements
 Most of the codes here assume that the user have access to CUDA capable GPU, at least a GTX 1050 ti or a GTX 1060
 ### Data Files
-* [Pre-trained VGG16 network weights](https://drive.google.com/file/d/1a0sFcNEvmIy21PE0yp7tzJuU0vhhV0Ln/view?usp=sharing) - put it in `models/` directory
+* [Pre-trained VGG16 network weights](https://github.com/jcjohnson/pytorch-vgg) - put it in `models/` directory
 * [MS-COCO Train Images (2014)](http://cocodataset.org/#download) - 13GB - put `train2014` directory in `dataset/` directory
 * [torchvision](https://pytorch.org/) - `torchvision.models` contains the VGG16 and VGG19 model skeleton
 
