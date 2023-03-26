@@ -95,7 +95,8 @@ def transfer_color(src, dest):
 def plot_loss_hist(contrastive_loss, c_loss, s_loss, total_loss, title="Loss History"):
     x = [i for i in range(len(total_loss))]
     plt.figure(figsize=[10, 6])
-    plt.plot(x, contrastive_loss, label="Contrastive_loss")
+    if len(contrastive_loss):
+        plt.plot(x, contrastive_loss, label="Contrastive_loss")
     plt.plot(x, c_loss, label="Content Loss")
     plt.plot(x, s_loss, label="Style Loss")
     plt.plot(x, total_loss, label="Total Loss")
