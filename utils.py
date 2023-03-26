@@ -3,22 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms, datasets
-from torch import nn
-
-
-class ContrastiveLoss(nn.Module):
-    def __init__(self, margin):
-        super(ContrastiveLoss, self).__init__()
-        self.margin = margin
-
-    def forward(self, anchor, positive):
-        distance = nn.PairwiseDistance()(anchor, positive)
-        loss = torch.mean(torch.clamp(self.margin - distance, min=0.0) ** 2)
-        return loss
 
 
 # Gram Matrix
-def gram(tensor):
+def get_style_gram(tensor):
     B, C, H, W = tensor.shape
     x = tensor.view(B, C, H*W)
     x_t = x.transpose(1, 2)
@@ -134,4 +122,3 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         # make a new tuple that includes original and the path
         tuple_with_path = (*original_tuple, path)
         return tuple_with_path
-    
