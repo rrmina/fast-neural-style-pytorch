@@ -1,8 +1,5 @@
-# Fast Style Transfer with contrastive Loss
-
-
 ## Attribution and Additions
-All code in this repo is taken as is from [Fast Style Transfer in Pytorch](https://github.com/rrmina/fast-neural-style-pytorch), with minor additions as needed:
+This repo represents a very abridged and limited version of [Fast Style Transfer in Pytorch](https://github.com/rrmina/fast-neural-style-pytorch). Most code remains as is, with minor additions as needed:
 
 1. Addition of contrastive loss
 2. Embedding contrastive loss in original training/plotting code

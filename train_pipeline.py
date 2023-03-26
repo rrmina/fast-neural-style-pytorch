@@ -37,35 +37,36 @@ class TrainPipeline:
         self._train_dataloader = train_dataloader
         self._initialize_model_params(vgg)
         self._initialize_loss_trackers()
-        self._initialize_required_tensors()
         os.makedirs(self.config.SAVE_MODEL_PATH, exist_ok=True)
         os.makedirs(self.config.SAVE_IMAGE_PATH, exist_ok=True)
         self._batch_count = 1
-
-    def _initialize_required_tensors(self):
-         # Get Style Features
         self._imagenet_neg_mean = torch.tensor(
             [-103.939, -116.779, -123.68], 
             dtype=torch.float32).reshape(1,3,1,1).to(self.config.DEVICE)
+        
+        self._initialize_required_tensors()
+
+    def _initialize_loss_trackers(self):
+        self._content_loss_history = []
+        self._style_loss_history = []
+        self._contrastive_loss_history = []
+        self._total_loss_history = []
+        self._batch_contrastive_loss_sum = 0 
+        self._batch_content_loss_sum = 0
+        self._batch_style_loss_sum = 0
+        self._batch_total_loss_sum = 0
+
+    def _initialize_required_tensors(self):
+        
         self._style_image = load_image(self.config.STYLE_IMAGE_PATH)
         self._style_tensor = itot(self._style_image).to(self.config.DEVICE)
         self._style_tensor = self._style_tensor.add(self._imagenet_neg_mean)
         B, C, H, W = self._style_tensor.shape
         style_features = self.vgg(self._style_tensor.expand(
-             [self.hyper_params.BATCH_SIZE, C, H, W]))
+            [self.hyper_params.BATCH_SIZE, C, H, W]))
         self._style_gram = {}
         for key, value in style_features.items():
             self._style_gram[key] = get_style_gram(value)
-
-    def _initialize_loss_trackers(self):
-            self._content_loss_history = []
-            self._style_loss_history = []
-            self._contrastive_loss_history = []
-            self._total_loss_history = []
-            self._batch_contrastive_loss_sum = 0 
-            self._batch_content_loss_sum = 0
-            self._batch_style_loss_sum = 0
-            self._batch_total_loss_sum = 0
 
 
     def _initialize_model_params(self, vgg):

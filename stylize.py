@@ -120,12 +120,13 @@ def stylize_folder(style_path, folder_containing_the_content_folder, save_folder
         for content_batch, _, path in image_loader:
             # Free-up unneeded cuda memory
             torch.cuda.empty_cache()
-
+              
             # Generate image
             generated_tensor = net(content_batch.to(device)).detach()
 
             # Save images
             for i in range(len(path)):
+                content_image = utils.load_image(path[i])
                 generated_image = utils.ttoi(generated_tensor[i])
                 if (PRESERVE_COLOR):
                     generated_image = utils.transfer_color(content_image, generated_image)

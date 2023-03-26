@@ -1,65 +1,5 @@
-import torch
 import torch.nn as nn
 
-class TransformerNetwork(nn.Module):
-    """Feedforward Transformation Network without Tanh
-    reference: https://arxiv.org/abs/1603.08155 
-    exact architecture: https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf
-    """
-    def __init__(self):
-        super(TransformerNetwork, self).__init__()
-        self.ConvBlock = nn.Sequential(
-            ConvLayer(3, 32, 9, 1),
-            nn.ReLU(),
-            ConvLayer(32, 64, 3, 2),
-            nn.ReLU(),
-            ConvLayer(64, 128, 3, 2),
-            nn.ReLU()
-        )
-        self.ResidualBlock = nn.Sequential(
-            ResidualLayer(128, 3), 
-            ResidualLayer(128, 3), 
-            ResidualLayer(128, 3), 
-            ResidualLayer(128, 3), 
-            ResidualLayer(128, 3)
-        )
-        self.DeconvBlock = nn.Sequential(
-            DeconvLayer(128, 64, 3, 2, 1),
-            nn.ReLU(),
-            DeconvLayer(64, 32, 3, 2, 1),
-            nn.ReLU(),
-            ConvLayer(32, 3, 9, 1, norm="None")
-        )
-
-    def forward(self, x):
-        x = self.ConvBlock(x)
-        x = self.ResidualBlock(x)
-        out = self.DeconvBlock(x)
-        return out
-
-class TransformerNetworkTanh(TransformerNetwork):
-    """A modification of the transformation network that uses Tanh function as output 
-    This follows more closely the architecture outlined in the original paper's supplementary material
-    his model produces darker images and provides retro styling effect
-    Reference: https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf
-    """
-    # override __init__ method
-    def __init__(self, tanh_multiplier=150):
-        super(TransformerNetworkTanh, self).__init__()
-        # Add a Tanh layer before output
-        self.DeconvBlock = nn.Sequential(
-            DeconvLayer(128, 64, 3, 2, 1),
-            nn.ReLU(),
-            DeconvLayer(64, 32, 3, 2, 1),
-            nn.ReLU(),
-            ConvLayer(32, 3, 9, 1, norm="None"),
-            nn.Tanh()
-        )
-        self.tanh_multiplier = tanh_multiplier
-
-    # Override forward method
-    def forward(self, x):
-        return super(TransformerNetworkTanh, self).forward(x) * self.tanh_multiplier
 
 class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, norm="instance"):
@@ -128,3 +68,64 @@ class DeconvLayer(nn.Module):
         else:
             out = self.norm_layer(x)
         return out
+    
+
+class TransformerNetwork(nn.Module):
+    """Feedforward Transformation Network without Tanh
+    reference: https://arxiv.org/abs/1603.08155 
+    exact architecture: https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf
+    """
+    def __init__(self):
+        super(TransformerNetwork, self).__init__()
+        self.ConvBlock = nn.Sequential(
+            ConvLayer(3, 32, 9, 1),
+            nn.ReLU(),
+            ConvLayer(32, 64, 3, 2),
+            nn.ReLU(),
+            ConvLayer(64, 128, 3, 2),
+            nn.ReLU()
+        )
+        self.ResidualBlock = nn.Sequential(
+            ResidualLayer(128, 3), 
+            ResidualLayer(128, 3), 
+            ResidualLayer(128, 3), 
+            ResidualLayer(128, 3), 
+            ResidualLayer(128, 3)
+        )
+        self.DeconvBlock = nn.Sequential(
+            DeconvLayer(128, 64, 3, 2, 1),
+            nn.ReLU(),
+            DeconvLayer(64, 32, 3, 2, 1),
+            nn.ReLU(),
+            ConvLayer(32, 3, 9, 1, norm="None")
+        )
+
+    def forward(self, x):
+        x = self.ConvBlock(x)
+        x = self.ResidualBlock(x)
+        out = self.DeconvBlock(x)
+        return out
+
+class TransformerNetworkTanh(TransformerNetwork):
+    """A modification of the transformation network that uses Tanh function as output 
+    This follows more closely the architecture outlined in the original paper's supplementary material
+    his model produces darker images and provides retro styling effect
+    Reference: https://cs.stanford.edu/people/jcjohns/papers/fast-style/fast-style-supp.pdf
+    """
+    # override __init__ method
+    def __init__(self, tanh_multiplier=150):
+        super(TransformerNetworkTanh, self).__init__()
+        # Add a Tanh layer before output
+        self.DeconvBlock = nn.Sequential(
+            DeconvLayer(128, 64, 3, 2, 1),
+            nn.ReLU(),
+            DeconvLayer(64, 32, 3, 2, 1),
+            nn.ReLU(),
+            ConvLayer(32, 3, 9, 1, norm="None"),
+            nn.Tanh()
+        )
+        self.tanh_multiplier = tanh_multiplier
+
+    # Override forward method
+    def forward(self, x):
+        return super(TransformerNetworkTanh, self).forward(x) * self.tanh_multiplier
