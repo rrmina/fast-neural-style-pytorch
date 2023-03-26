@@ -1,4 +1,4 @@
-# Fast Style Transfer with contrastive Loss
+# Fast Neural Style Transfer with contrastive Loss
 
 
 ## Attribution and Additions
