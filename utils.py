@@ -3,6 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms, datasets
+from torch import nn
+
+
+class ContrastiveLoss(nn.Module):
+    def __init__(self, margin):
+        super(ContrastiveLoss, self).__init__()
+        self.margin = margin
+
+    def forward(self, anchor, positive):
+        distance = nn.PairwiseDistance()(anchor, positive)
+        loss = torch.mean(torch.clamp(self.margin - distance, min=0.0) ** 2)
+        return loss
+
 
 # Gram Matrix
 def gram(tensor):
@@ -91,9 +104,10 @@ def transfer_color(src, dest):
     
     return cv2.cvtColor(src_yiq, cv2.COLOR_YCrCb2BGR).clip(0,255)  #4 Convert new image from YIQ back to BGR
 
-def plot_loss_hist(c_loss, s_loss, total_loss, title="Loss History"):
+def plot_loss_hist(contrastive_loss, c_loss, s_loss, total_loss, title="Loss History"):
     x = [i for i in range(len(total_loss))]
     plt.figure(figsize=[10, 6])
+    plt.plot(x, contrastive_loss, label="Contrastive_loss")
     plt.plot(x, c_loss, label="Content Loss")
     plt.plot(x, s_loss, label="Style Loss")
     plt.plot(x, total_loss, label="Total Loss")
@@ -120,3 +134,4 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         # make a new tuple that includes original and the path
         tuple_with_path = (*original_tuple, path)
         return tuple_with_path
+    
