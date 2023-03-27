@@ -6,7 +6,6 @@ import numpy as np
 import random
 
 
-
 @dataclass
 class ModelConfig:
     DATASET_PATH = "dataset"
@@ -15,7 +14,7 @@ class ModelConfig:
     SEED = 35
     SAVE_IMAGE_PATH = "images/out/"
     SAVE_MODEL_PATH = "models/"
-    STYLE_IMAGE_PATH = "images/mosaic.jpg"
+    STYLE_IMAGE_PATH = "images/"
     TRAIN_IMAGE_SIZE = 256
 
 

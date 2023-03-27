@@ -1,23 +1,23 @@
 import os
+import sys
+import random
 import time
 import logging
 import torch
 from torch import nn
-
-
-import vgg
 import transformer
 import torch.optim as optim
 
 from loss_functions import ContrastiveLoss
 from utils import (
     get_style_gram,
-    load_image,
     itot,
+    load_image,
     ttoi,
     saveimg, 
     plot_loss_hist
 )
+from train_utils import set_all_seeds
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
@@ -30,10 +30,18 @@ root.addHandler(handler)
 
 class TrainPipeline:
 
-    def __init__(self, config,  hyper_param, train_dataloader, vgg):
+    def __init__(
+            self, 
+            config,  
+            hyper_param, 
+            train_dataloader, 
+            vgg, 
+            use_one_style_image: bool = True
+        ):
 
         self.config = config
         self.hyper_params = hyper_param
+        set_all_seeds(seed=self.config.SEED)
         self._train_dataloader = train_dataloader
         self._initialize_model_params(vgg)
         self._initialize_loss_trackers()
@@ -43,8 +51,38 @@ class TrainPipeline:
         self._imagenet_neg_mean = torch.tensor(
             [-103.939, -116.779, -123.68], 
             dtype=torch.float32).reshape(1,3,1,1).to(self.config.DEVICE)
+
         
-        self._initialize_required_tensors()
+        self._style_image_paths = os.listdir(
+                self.config.STYLE_IMAGE_PATH
+            )
+        if use_one_style_image:
+            self._style_grams = self.__calculate_style_grams(
+                self._style_image_paths[0]
+            )
+        self._style_grams = self._initialize_style_grams()
+        self._style_image_indices = []
+
+    def __calculate_style_grams(self, style_image_path):
+        style_image = load_image(style_image_path)
+        style_tensor = itot(style_image).to(self.config.DEVICE)
+        style_tensor = style_tensor.add()
+        B, C, H, W = style_tensor.shape
+        style_features = self.vgg(self.style_tensor.expand(
+            [self.hyper_params.BATCH_SIZE, C, H, W]))
+        style_gram = {}
+        for key, value in style_features.items():
+            style_gram[key] = get_style_gram(value)
+
+
+    def _initialize_style_grams(self, style_image_paths):
+        self.vgg.eval()
+        style_grams = []
+        with torch.no_grad():
+
+            for image_path in style_image_paths:
+                style_grams.append(self.__calculate_style_grams(image_path))
+        
 
     def _initialize_loss_trackers(self):
         self._content_loss_history = []
@@ -55,18 +93,6 @@ class TrainPipeline:
         self._batch_content_loss_sum = 0
         self._batch_style_loss_sum = 0
         self._batch_total_loss_sum = 0
-
-    def _initialize_required_tensors(self):
-        
-        self._style_image = load_image(self.config.STYLE_IMAGE_PATH)
-        self._style_tensor = itot(self._style_image).to(self.config.DEVICE)
-        self._style_tensor = self._style_tensor.add(self._imagenet_neg_mean)
-        B, C, H, W = self._style_tensor.shape
-        style_features = self.vgg(self._style_tensor.expand(
-            [self.hyper_params.BATCH_SIZE, C, H, W]))
-        self._style_gram = {}
-        for key, value in style_features.items():
-            self._style_gram[key] = get_style_gram(value)
 
 
     def _initialize_model_params(self, vgg):
@@ -90,6 +116,14 @@ class TrainPipeline:
 
     def train(self):
 
+        if len(self._style_grams) == 1:
+            style_gram = self._style_grams
+            self._style_image_indices = [0]
+        else:
+            style_gram_index = random.randrange(len(self._style_image_indices))
+            self._style_image_indices.append(style_gram_index)
+            style_gram = self._style_grams[style_gram_index]
+
         for content_batch, _ in self._train_dataloader:
             # Get current batch size in case of odd batch sizes
             curr_batch_size = content_batch.shape[0]
@@ -103,8 +137,9 @@ class TrainPipeline:
             # Generate images and get features
             content_batch = content_batch[:,[2,1,0]].to(self.config.DEVICE)
             generated_batch = self.transformer_network(content_batch)
-            content_features = self.vgg(content_batch.add(self._imagenet_neg_mean))
-            generated_features = self.vgg(generated_batch.add(self._imagenet_neg_mean))
+            with torch.no_grad():
+                content_features = self.vgg(content_batch.add(self._imagenet_neg_mean))
+                generated_features = self.vgg(generated_batch.add(self._imagenet_neg_mean))
 
             # Content Loss
             MSELoss = nn.MSELoss().to(self.config.device)
@@ -115,7 +150,7 @@ class TrainPipeline:
             # Style Loss
             style_loss = 0
             for key, value in generated_features.items():
-                s_loss = MSELoss(get_style_gram(value), self._style_gram[key][:curr_batch_size])
+                s_loss = MSELoss(get_style_gram(value), style_gram[key][:curr_batch_size])
                 style_loss += s_loss
             style_loss *= self.hyper_params.STYLE_WEIGHT
             self._batch_style_loss_sum += style_loss.item()
@@ -142,8 +177,7 @@ class TrainPipeline:
             self.optimizer.step()
         
     def training_loop(self):
-
-        
+        self.vgg.eval()
         start_time = time.time()
         for epoch in range(self.hyper_params.NUM_EPOCHS):
             logging.info(f"Epoch {epoch + 1}/{self.hyper_params.NUM_EPOCHS}")
