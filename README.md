@@ -80,7 +80,7 @@ python train.py
 ```
 
 **Options**
-* `TRAIN_IMAGE_SIZE`: sets the dimension (height and weight) of training images. Bigger GPU memory is needed to train with larger images. Default is `256`px.
+* `TRAIN_IMAGE_SIZE`: sets the dimension (height and width) of training images. Bigger GPU memory is needed to train with larger images. Default is `256`px.
 * `DATASET_PATH`: folder containing the MS-COCO `train2014` images. Default is `"dataset"` 
 * `NUM_EPOCHS`: Number of epochs of training pass. Default is `1` with 40,000 training images
 * `STYLE_IMAGE_PATH`: path of the style image
